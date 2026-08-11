@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU1 Sales Performance Dashboard — Q2 2026</title>
+<style>
+  :root{
+    --navy:#12233f;
+    --navy-light:#1c3760;
+    --teal:#0d9488;
+    --teal-light:#14b8a6;
+    --amber:#d97706;
+    --red:#dc2626;
+    --bg:#f3f5f8;
+    --card:#ffffff;
+    --border:#e3e8ef;
+    --text:#1a2333;
+    --text-sub:#5b6779;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    font-family:'Sarabun','Noto Sans Thai','Segoe UI',system-ui,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1440px;margin:0 auto;padding:20px;}
+
+  /* header */
+  header.top{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+    color:#fff;border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;
+    box-shadow:var(--shadow);
+  }
+  header.top .row1{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+  header.top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:.2px;}
+  header.top .sub{margin-top:4px;font-size:13px;color:#c7d2e0;}
+  .badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+    padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+
+  /* filter */
+  .filter-wrap{position:relative;}
+  .filter-btn{
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;
+    padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;
+    font-weight:500;min-width:220px;justify-content:space-between;
+  }
+  .filter-btn:hover{background:rgba(255,255,255,.2);}
+  .chev{transition:transform .15s;}
+  .filter-btn.open .chev{transform:rotate(180deg);}
+  .filter-panel{
+    display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;color:var(--text);
+    border-radius:10px;box-shadow:0 10px 30px rgba(16,24,40,.25);width:320px;z-index:50;
+    border:1px solid var(--border);overflow:hidden;
+  }
+  .filter-panel.open{display:block;}
+  .filter-search{padding:10px;border-bottom:1px solid var(--border);}
+  .filter-search input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;}
+  .filter-actions{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);background:#f8fafc;}
+  .filter-actions button{background:none;border:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;}
+  .filter-actions button:hover{text-decoration:underline;}
+  .filter-list{max-height:320px;overflow-y:auto;padding:6px 4px;}
+  .filter-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
+  .filter-item:hover{background:#f1f5f9;}
+  .filter-item input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;flex:none;}
+  .filter-item span.rank{color:var(--text-sub);font-size:11px;width:18px;flex:none;}
+  .filter-footer{padding:8px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-sub);background:#f8fafc;}
+
+  /* KPI */
+  .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px;}
+  .kpi-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);}
+  .kpi-label{font-size:11.5px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+  .kpi-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1.15;}
+  .kpi-sub{font-size:12px;margin-top:5px;font-weight:600;}
+  .kpi-sub.pos{color:var(--teal);}
+  .kpi-sub.neg{color:var(--red);}
+  .kpi-sub.neutral{color:var(--text-sub);font-weight:500;}
+
+  /* charts */
+  .chart-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px;}
+  .chart-row.second{grid-template-columns:1fr 1fr;}
+  .card{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+  .card h3{margin:0 0 3px 0;font-size:14.5px;font-weight:700;color:var(--navy);}
+  .card p.hint{margin:0 0 12px 0;font-size:12px;color:var(--text-sub);}
+  .chart-holder{position:relative;}
+  .chart-holder.tall{height:420px;}
+  .chart-holder.mid{height:300px;}
+
+  /* person cards */
+  .person-section{margin-bottom:18px;}
+  .person-section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+  .person-section-head h2{margin:0;font-size:16px;font-weight:700;color:var(--navy);}
+  .person-section-head p{margin:2px 0 0 0;font-size:12px;color:var(--text-sub);}
+  .person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .person-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);border-top:4px solid var(--teal);}
+  .person-card.mid{border-top-color:var(--amber);}
+  .person-card.low{border-top-color:var(--red);}
+  .person-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+  .person-name{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.3;}
+  .person-rank{font-size:11px;color:var(--text-sub);font-weight:600;}
+  .person-pct{font-size:20px;font-weight:800;flex:none;}
+  .person-pct.good{color:var(--teal);}
+  .person-pct.mid{color:var(--amber);}
+  .person-pct.low{color:var(--red);}
+  .progress-track{height:7px;background:#e9edf3;border-radius:10px;overflow:hidden;margin-bottom:12px;}
+  .progress-fill{height:100%;border-radius:10px;}
+  .person-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12px;}
+  .pm-label{color:var(--text-sub);}
+  .pm-value{font-weight:700;color:var(--text);float:right;}
+  .person-metrics .full{grid-column:1/-1;display:flex;justify-content:space-between;border-top:1px dashed var(--border);padding-top:7px;margin-top:2px;}
+
+  /* table */
+  .table-card{background:var(--card);border-radius:var(--radius);padding:18px 20px 6px 20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px;}
+  .table-scroll{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:12px;min-width:1500px;}
+  thead th{
+    background:#eef2f7;text-align:center;padding:8px 9px;border:1px solid #d7dee8;
+    font-size:11px;color:var(--navy);font-weight:700;white-space:nowrap;
+  }
+  thead tr.grp th{background:#e3e9f2;font-size:11.5px;}
+  thead tr.grp th.sortable{cursor:pointer;}
+  thead tr.grp th.sortable:hover{color:var(--teal);}
+  thead tr.grp th.sortable.sorted{color:var(--teal);background:#dcf4f1;}
+  thead tr.sub th{background:#f4f7fa;font-size:10.5px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.3px;cursor:pointer;}
+  thead tr.sub th:hover{color:var(--teal);background:#eaf5f3;}
+  thead tr.sub th.sorted{color:var(--teal);background:#dcf4f1;}
+  tbody td{padding:7px 9px;border:1px solid #eef1f5;text-align:right;white-space:nowrap;}
+  tbody td:nth-child(1), tbody td:nth-child(2){text-align:left;}
+  tbody tr:hover{background:#f8fafc;}
+  .name-cell{font-weight:600;color:var(--text);}
+  .pct-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-weight:700;font-size:12px;}
+  .pct-good{background:#d1fae5;color:#047857;}
+  .pct-mid{background:#fef3c7;color:#b45309;}
+  .pct-bad{background:#fee2e2;color:#b91c1c;}
+  .diff-neg{color:var(--red);font-weight:600;}
+  .diff-pos{color:var(--teal);font-weight:600;}
+
+  footer.foot{text-align:center;font-size:12px;color:var(--text-sub);padding:16px 0 8px;}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-sub);font-size:14px;}
+
+  @media (max-width:1100px){
+    .kpi-row{grid-template-columns:repeat(3,1fr);}
+    .chart-row, .chart-row.second{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="row1">
+      <div>
+        <h1>BU1 Sales Performance Dashboard</h1>
+        <div class="sub">AssetWise · Business Unit 1 · <span class="badge" id="period-badge">Period: May – July 2026</span></div>
+      </div>
+      <div class="filter-wrap">
+        <button class="filter-btn" id="filterBtn">
+          <span id="filterBtnLabel">พนักงานขายทั้งหมด (21)</span>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="filter-panel" id="filterPanel">
+          <div class="filter-search"><input type="text" id="searchInput" placeholder="ค้นหารายชื่อพนักงานขาย..."></div>
+          <div class="filter-actions">
+            <button id="selectAllBtn">✓ เลือกทั้งหมด</button>
+            <button id="clearAllBtn">✕ ล้างการเลือก</button>
+          </div>
+          <div class="filter-list" id="filterList"></div>
+          <div class="filter-footer"><span id="filterCountLabel">เลือก 21 / 21 คน</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="table-card">
+    <h3 style="margin-bottom:2px;">รายละเอียด Sales Performance รายบุคคล — Sales ทั้งหมด</h3>
+    <p class="hint">แสดงข้อมูลทุกคนก่อนเป็นค่าเริ่มต้น — ใช้ตัวกรอง "พนักงานขาย" ที่มุมขวาบนเพื่อเลือกดูเฉพาะบางคน · คลิกที่หัวคอลัมน์เพื่อเรียงลำดับ</p>
+    <div class="table-scroll">
+      <table id="dataTable">
+        <thead>
+          <tr class="grp">
+            <th rowspan="2" data-key="no" class="sortable">NO</th>
+            <th rowspan="2" data-key="name" class="sortable">Sale</th>
+            <th colspan="2">เป้าขาย รวม<br>(Working Target)</th>
+            <th colspan="2">ยอดขายรวม</th>
+            <th rowspan="2" data-key="pct_target" class="sortable">% ยอดขาย/เทียบเป้ารวม<br>(เทียบ VALUE)</th>
+            <th colspan="2">Sold by B2B</th>
+            <th colspan="2">ยอดขายรวม<br>(หัก B2B)</th>
+            <th rowspan="2" data-key="pct_net_target" class="sortable">% ยอดขาย NET/<br>เทียบเป้ารวม<br>(เทียบ VALUE)</th>
+            <th rowspan="2" data-key="diff_unit" class="sortable">Diff Target<br>(Unit)</th>
+            <th rowspan="2" data-key="diff_mb" class="sortable">Diff Target<br>(MB)</th>
+            <th rowspan="2" data-key="walk" class="sortable">Walk</th>
+            <th>Ratio</th>
+            <th rowspan="2" data-key="register" class="sortable">Register<br>(ตัด F)</th>
+            <th>Ratio</th>
+            <th colspan="2">% การทำ CS 1-2<br>(รวม 3 เดือน)</th>
+            <th colspan="2">คะแนนเฉลี่ย CS1-2<br>(รวม 3 เดือน)</th>
+          </tr>
+          <tr class="sub">
+            <th data-key="target_unit">Unit</th>
+            <th data-key="target_mb">MB</th>
+            <th data-key="sales_unit">Unit</th>
+            <th data-key="sales_mb">MB</th>
+            <th data-key="b2b_unit">Unit</th>
+            <th data-key="b2b_mb">MB</th>
+            <th data-key="net_unit">Unit</th>
+            <th data-key="net_mb">MB</th>
+            <th data-key="ratio_walk_book">Walk : Book</th>
+            <th data-key="ratio_lead_walk">Lead : Walk</th>
+            <th data-key="cs1_pct">CS1</th>
+            <th data-key="cs2_pct">CS2</th>
+            <th data-key="cs1_score">CS1</th>
+            <th data-key="cs2_score">CS2</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none;">ไม่มีข้อมูลที่ตรงกับตัวกรอง — กรุณาเลือกพนักงานขายอย่างน้อย 1 คน</div>
+  </section>
+
+  <section class="kpi-row" id="kpiRow"></section>
+
+  <section class="person-section">
+    <div class="person-section-head">
+      <div>
+        <h2>ผลงานรายบุคคล (Sales ที่เลือก)</h2>
+        <p>แสดงทุกคนที่เลือกไว้ในหน้าเดียว เรียงจาก % ความสำเร็จเป้าสูง → ต่ำ</p>
+      </div>
+      <span class="badge" id="personCountBadge" style="background:#eef2f7;color:var(--navy);border:1px solid var(--border);">0 คน</span>
+    </div>
+    <div class="person-grid" id="personGrid"></div>
+  </section>
+
+  <footer class="foot">AssetWise BU1 · Sales Performance Dashboard · จัดทำจากไฟล์ BU1_Q2_2026.xlsx · Period: May – July 2026</footer>
+</div>
+
+<script>
+const RAW_DATA = [{"no": 1, "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 41, "target_mb": 93187521.22, "sales_unit": 24, "sales_mb": 51914000, "pct_target": 55.71, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 24, "net_mb": 51914000, "pct_net_target": 55.71, "diff_unit": -17, "diff_mb": -41273521.22, "walk": 21, "ratio_walk_book": 6.33, "register": 133, "ratio_lead_walk": "6 : 1", "cs1_pct": 99.25, "cs2_pct": 98.92, "cs1_score": 99.22, "cs2_score": 100}, {"no": 2, "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 39, "target_mb": 89161358.23, "sales_unit": 27, "sales_mb": 60294520, "pct_target": 67.62, "b2b_unit": 1, "b2b_mb": 2740000, "net_unit": 26, "net_mb": 57554520, "pct_net_target": 64.55, "diff_unit": -13, "diff_mb": -31606838.23, "walk": 24, "ratio_walk_book": 8, "register": 192, "ratio_lead_walk": "8 : 1", "cs1_pct": 82.76, "cs2_pct": 140.0, "cs1_score": 99.71, "cs2_score": 99.82}, {"no": 3, "name": "รัตนา คงซัง (เอ๋)", "target_unit": 38, "target_mb": 86035466.88, "sales_unit": 20.5, "sales_mb": 50267000, "pct_target": 58.43, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 19.5, "net_mb": 45705000, "pct_net_target": 53.12, "diff_unit": -18.5, "diff_mb": -40330466.88, "walk": 24, "ratio_walk_book": 4.83, "register": 116, "ratio_lead_walk": "5 : 1", "cs1_pct": 96.0, "cs2_pct": 115.38, "cs1_score": 97.73, "cs2_score": 99.85}, {"no": 4, "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 39, "target_mb": 88525466.88, "sales_unit": 23, "sales_mb": 52920100, "pct_target": 59.78, "b2b_unit": 1, "b2b_mb": 3810000, "net_unit": 22, "net_mb": 49110100, "pct_net_target": 55.48, "diff_unit": -17, "diff_mb": -39415366.88, "walk": 29, "ratio_walk_book": 3.93, "register": 114, "ratio_lead_walk": "4 : 1", "cs1_pct": 90.63, "cs2_pct": 115.38, "cs1_score": 98.23, "cs2_score": 97.11}, {"no": 5, "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 40, "target_mb": 92021011.9, "sales_unit": 19.5, "sales_mb": 41605100, "pct_target": 45.21, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 19.5, "net_mb": 41605100, "pct_net_target": 45.21, "diff_unit": -20.5, "diff_mb": -50415911.9, "walk": 28, "ratio_walk_book": 6.71, "register": 188, "ratio_lead_walk": "7 : 1", "cs1_pct": 90.32, "cs2_pct": 106.25, "cs1_score": 97.74, "cs2_score": 96.8}, {"no": 6, "name": "กิ่งกาญจน์ ตรุษจา", "target_unit": 59, "target_mb": 113160000, "sales_unit": 38, "sales_mb": 81463767.25, "pct_target": 71.99, "b2b_unit": 5, "b2b_mb": 11325212, "net_unit": 33, "net_mb": 70138555.25, "pct_net_target": 61.98, "diff_unit": -26, "diff_mb": -43021444.75, "walk": 58, "ratio_walk_book": 1.53, "register": 228, "ratio_lead_walk": "4 : 1", "cs1_pct": 87.93, "cs2_pct": 69.44, "cs1_score": 98.33, "cs2_score": 97.79}, {"no": 7, "name": "กิติยา กัญยะโสภา", "target_unit": 59, "target_mb": 113160000, "sales_unit": 58, "sales_mb": 126033670, "pct_target": 111.38, "b2b_unit": 18, "b2b_mb": 36903197, "net_unit": 40, "net_mb": 89130473, "pct_net_target": 78.76, "diff_unit": -19, "diff_mb": -24029527, "walk": 76, "ratio_walk_book": 1.31, "register": 119, "ratio_lead_walk": "2 : 1", "cs1_pct": 53.95, "cs2_pct": 97.62, "cs1_score": 95.42, "cs2_score": 89.57}, {"no": 8, "name": "ชนัญชิดา เกิดกล้า", "target_unit": 59, "target_mb": 113160000, "sales_unit": 43, "sales_mb": 98720723, "pct_target": 87.24, "b2b_unit": 9, "b2b_mb": 20031160, "net_unit": 34, "net_mb": 78689563, "pct_net_target": 69.54, "diff_unit": -25, "diff_mb": -34470437, "walk": 68, "ratio_walk_book": 1.58, "register": 157, "ratio_lead_walk": "2 : 1", "cs1_pct": 45.59, "cs2_pct": 50.0, "cs1_score": 97.17, "cs2_score": 100}, {"no": 9, "name": "ชนิภรณ์ ชิณวงศ์", "target_unit": 62, "target_mb": 115460000, "sales_unit": 63, "sales_mb": 142320031.4, "pct_target": 123.26, "b2b_unit": 23, "b2b_mb": 45824495, "net_unit": 40, "net_mb": 96495536.4, "pct_net_target": 83.57, "diff_unit": -22, "diff_mb": -18964463.6, "walk": 78, "ratio_walk_book": 1.24, "register": 105, "ratio_lead_walk": "1 : 1", "cs1_pct": 52.56, "cs2_pct": 54.55, "cs1_score": 99.58, "cs2_score": 98.62}, {"no": 10, "name": "นิตยา สารักษ์", "target_unit": 59, "target_mb": 113160000, "sales_unit": 61, "sales_mb": 130314694.1, "pct_target": 115.16, "b2b_unit": 17, "b2b_mb": 34525973, "net_unit": 44, "net_mb": 95788721.1, "pct_net_target": 84.65, "diff_unit": -15, "diff_mb": -17371278.9, "walk": 83, "ratio_walk_book": 1.36, "register": 139, "ratio_lead_walk": "2 : 1", "cs1_pct": 49.4, "cs2_pct": 41.67, "cs1_score": 97.29, "cs2_score": 97.97}, {"no": 11, "name": "สุภารัตน์ ชุมพงศ์", "target_unit": 59, "target_mb": 113160000, "sales_unit": 58, "sales_mb": 131697578.5, "pct_target": 116.38, "b2b_unit": 18, "b2b_mb": 40925007, "net_unit": 40, "net_mb": 90772571.5, "pct_net_target": 80.22, "diff_unit": -19, "diff_mb": -22387428.5, "walk": 60, "ratio_walk_book": 1.03, "register": 114, "ratio_lead_walk": "2 : 1", "cs1_pct": 68.33, "cs2_pct": 65.22, "cs1_score": 95.0, "cs2_score": 97.32}, {"no": 12, "name": "นภัทร ศิริกุลธนะสุข", "target_unit": 34, "target_mb": 76070000, "sales_unit": 26, "sales_mb": 71180000, "pct_target": 93.57, "b2b_unit": 4, "b2b_mb": 10130000, "net_unit": 22, "net_mb": 61050000, "pct_net_target": 80.26, "diff_unit": -12, "diff_mb": -15020000, "walk": 44, "ratio_walk_book": 1.25, "register": 55, "ratio_lead_walk": "1 : 1", "cs1_pct": 50.0, "cs2_pct": 57.0, "cs1_score": 89.67, "cs2_score": 93.75}, {"no": 13, "name": "นํ้าฝน แสงนวล", "target_unit": 31, "target_mb": 71230000, "sales_unit": 22, "sales_mb": 59940000, "pct_target": 84.15, "b2b_unit": 5, "b2b_mb": 14240000, "net_unit": 17, "net_mb": 45700000, "pct_net_target": 64.16, "diff_unit": -14, "diff_mb": -25530000, "walk": 37, "ratio_walk_book": 1.81, "register": 67, "ratio_lead_walk": "2 : 1", "cs1_pct": 80.0, "cs2_pct": 78.0, "cs1_score": 95.05, "cs2_score": 95.94}, {"no": 14, "name": "สกาวเดือน สายทองกู่", "target_unit": 36, "target_mb": 79300000, "sales_unit": 29, "sales_mb": 75120000, "pct_target": 94.73, "b2b_unit": 3, "b2b_mb": 10560000, "net_unit": 26, "net_mb": 64560000, "pct_net_target": 81.41, "diff_unit": -10, "diff_mb": -14740000, "walk": 37, "ratio_walk_book": 4.24, "register": 157, "ratio_lead_walk": "4 : 1", "cs1_pct": 57.0, "cs2_pct": 40.0, "cs1_score": 89.47, "cs2_score": 93.24}, {"no": 15, "name": "สันนดี ศิลา", "target_unit": 24, "target_mb": 78343912.65, "sales_unit": 31, "sales_mb": 91055000, "pct_target": 116.22, "b2b_unit": 18, "b2b_mb": 50483000, "net_unit": 13, "net_mb": 40572000, "pct_net_target": 51.79, "diff_unit": -11, "diff_mb": -37771912.65, "walk": 46, "ratio_walk_book": 5.96, "register": 274, "ratio_lead_walk": "6 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.08, "cs2_score": 98.44}, {"no": 16, "name": "ปนิตา แหวนจีน", "target_unit": 24, "target_mb": 78343912.65, "sales_unit": 22, "sales_mb": 57915000, "pct_target": 73.92, "b2b_unit": 8, "b2b_mb": 22195000, "net_unit": 14, "net_mb": 35720000, "pct_net_target": 45.59, "diff_unit": -10, "diff_mb": -42623912.65, "walk": 28, "ratio_walk_book": 8.32, "register": 233, "ratio_lead_walk": "8 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.01, "cs2_score": 100}, {"no": 17, "name": "ณเกษกมล จันทร์สว่าง", "target_unit": 15, "target_mb": 56501400, "sales_unit": 12, "sales_mb": 62566489.71, "pct_target": 110.73, "b2b_unit": 10, "b2b_mb": 56331489.71, "net_unit": 2, "net_mb": 6235000, "pct_net_target": 11.04, "diff_unit": -13, "diff_mb": -50266400, "walk": 19, "ratio_walk_book": 2.11, "register": 40, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.12, "cs2_score": 99.66}, {"no": 18, "name": "ภัทร์นรินทร์ ธกรกัณยาวีร์", "target_unit": 15, "target_mb": 56501400, "sales_unit": 18, "sales_mb": 56166464.08, "pct_target": 99.41, "b2b_unit": 12, "b2b_mb": 39906464.08, "net_unit": 6, "net_mb": 16260000, "pct_net_target": 28.78, "diff_unit": -9, "diff_mb": -40241400, "walk": 31, "ratio_walk_book": 2.06, "register": 64, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 98.8, "cs2_score": 99.58}, {"no": 19, "name": "ศุภรดา สุนันท์สถาพร", "target_unit": 15, "target_mb": 56501400, "sales_unit": 10, "sales_mb": 40418947, "pct_target": 71.54, "b2b_unit": 5, "b2b_mb": 26308947, "net_unit": 5, "net_mb": 14110000, "pct_net_target": 24.97, "diff_unit": -10, "diff_mb": -42391400, "walk": 17, "ratio_walk_book": 2.29, "register": 39, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 98.8, "cs2_score": 99.58}, {"no": 20, "name": "ไปรยา ลีรัตนขจร", "target_unit": 15, "target_mb": 56501400, "sales_unit": 8, "sales_mb": 35853749, "pct_target": 63.46, "b2b_unit": 7, "b2b_mb": 28873749, "net_unit": 1, "net_mb": 6980000, "pct_net_target": 12.35, "diff_unit": -14, "diff_mb": -49521400, "walk": 12, "ratio_walk_book": 2.5, "register": 30, "ratio_lead_walk": "3 : 1", "cs1_pct": 92.0, "cs2_pct": 82.0, "cs1_score": 98.57, "cs2_score": 99.37}, {"no": 21, "name": "รอยพิมพ์ เหล่าดี", "target_unit": 15, "target_mb": 56501400, "sales_unit": 7, "sales_mb": 19458000, "pct_target": 34.44, "b2b_unit": 2, "b2b_mb": 7200000, "net_unit": 5, "net_mb": 12258000, "pct_net_target": 21.7, "diff_unit": -10, "diff_mb": -44243400, "walk": 15, "ratio_walk_book": 3.47, "register": 52, "ratio_lead_walk": "3 : 1", "cs1_pct": 85.0, "cs2_pct": 82.0, "cs1_score": 99.58, "cs2_score": 99.58}];
+
+const fmtNum = n => Math.round(n).toLocaleString('en-US');
+const fmtMB = n => (n/1e6).toLocaleString('en-US',{maximumFractionDigits:1,minimumFractionDigits:1});
+const fmtPct = n => n.toFixed(1)+'%';
+
+let selected = new Set(RAW_DATA.map(d=>d.no));
+let sortKey = 'pct_net_target';
+let sortDir = 'desc';
+
+
+// ---------- Filter panel ----------
+const filterBtn = document.getElementById('filterBtn');
+const filterPanel = document.getElementById('filterPanel');
+const filterList = document.getElementById('filterList');
+const searchInput = document.getElementById('searchInput');
+
+function renderFilterList(query=''){
+  filterList.innerHTML = '';
+  const q = query.trim().toLowerCase();
+  RAW_DATA.filter(d=>d.name.toLowerCase().includes(q)).forEach(d=>{
+    const item = document.createElement('label');
+    item.className='filter-item';
+    item.innerHTML = `<input type="checkbox" data-no="${d.no}" ${selected.has(d.no)?'checked':''}>
+      <span class="rank">#${d.no}</span><span>${d.name}</span>`;
+    filterList.appendChild(item);
+  });
+}
+renderFilterList();
+
+filterBtn.addEventListener('click', ()=>{
+  filterPanel.classList.toggle('open');
+  filterBtn.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!filterBtn.contains(e.target) && !filterPanel.contains(e.target)){
+    filterPanel.classList.remove('open');
+    filterBtn.classList.remove('open');
+  }
+});
+searchInput.addEventListener('input', e=>renderFilterList(e.target.value));
+
+filterList.addEventListener('change', e=>{
+  if(e.target.matches('input[type="checkbox"]')){
+    const no = Number(e.target.dataset.no);
+    if(e.target.checked) selected.add(no); else selected.delete(no);
+    updateAll();
+  }
+});
+
+document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+  selected = new Set(RAW_DATA.map(d=>d.no));
+  renderFilterList(searchInput.value);
+  updateAll();
+});
+document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+  selected = new Set();
+  renderFilterList(searchInput.value);
+  updateAll();
+});
+
+function updateFilterLabel(){
+  const total = RAW_DATA.length;
+  const n = selected.size;
+  document.getElementById('filterCountLabel').textContent = `เลือก ${n} / ${total} คน`;
+  const label = document.getElementById('filterBtnLabel');
+  if(n===total) label.textContent = `พนักงานขายทั้งหมด (${total})`;
+  else if(n===0) label.textContent = `ยังไม่ได้เลือก`;
+  else if(n<=2) label.textContent = RAW_DATA.filter(d=>selected.has(d.no)).map(d=>d.name.split(' ')[0]).join(', ');
+  else label.textContent = `เลือกแล้ว ${n} คน`;
+}
+
+// ---------- KPI ----------
+function renderKPIs(data){
+  const kpiRow = document.getElementById('kpiRow');
+  if(data.length===0){ kpiRow.innerHTML=''; return; }
+  const sum = k => data.reduce((a,d)=>a+(d[k]||0),0);
+  const targetMB = sum('target_mb'), netMB = sum('net_mb'), grossMB = sum('sales_mb');
+  const targetUnit = sum('target_unit'), netUnit = sum('net_unit');
+  const achievement = targetMB? (netMB/targetMB*100):0;
+  const walk = sum('walk'), register = sum('register');
+  const avgCS = data.reduce((a,d)=>a+ (d.cs1_score+d.cs2_score)/2,0)/data.length;
+
+  const cards = [
+    {label:'เป้าขายรวม (MB)', value: fmtMB(targetMB)+' MB', sub:`${fmtNum(targetUnit)} Unit`, cls:'neutral'},
+    {label:'ยอดขายสุทธิ (Net MB)', value: fmtMB(netMB)+' MB', sub:`${fmtNum(netUnit)} Unit`, cls:'neutral'},
+    {label:'% ความสำเร็จเป้า (Net)', value: fmtPct(achievement), sub: achievement>=100?'บรรลุเป้าหมาย':`ขาดอีก ${fmtMB(targetMB-netMB)} MB`, cls: achievement>=100?'pos':'neg'},
+    {label:'ยอดขายรวม (Gross MB)', value: fmtMB(grossMB)+' MB', sub:`รวม B2B ${fmtMB(sum('b2b_mb'))} MB`, cls:'neutral'},
+    {label:'Walk รวม', value: fmtNum(walk)+' ครั้ง', sub:`Register ${fmtNum(register)} ราย`, cls:'neutral'},
+    {label:'คะแนนเฉลี่ย CS1–CS2', value: avgCS.toFixed(1)+'%', sub:`จาก ${data.length} คนที่เลือก`, cls: avgCS>=90?'pos':'neutral'},
+  ];
+  kpiRow.innerHTML = cards.map(c=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-sub ${c.cls}">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ---------- Person cards ----------
+function tierOf(pct){
+  if(pct>=90) return 'good';
+  if(pct>=60) return 'mid';
+  return 'low';
+}
+function renderPersonCards(data){
+  const grid = document.getElementById('personGrid');
+  document.getElementById('personCountBadge').textContent = `${data.length} คน`;
+  if(data.length===0){ grid.innerHTML=''; return; }
+  const sorted = [...data].sort((a,b)=>b.pct_net_target - a.pct_net_target);
+  grid.innerHTML = sorted.map(d=>{
+    const tier = tierOf(d.pct_net_target);
+    const barColor = tier==='good'?'#0d9488':(tier==='mid'?'#d97706':'#dc2626');
+    const pct = Math.min(d.pct_net_target,100);
+    return `
+    <div class="person-card ${tier==='good'?'':tier}">
+      <div class="person-head">
+        <div>
+          <div class="person-rank">#${d.no}</div>
+          <div class="person-name">${d.name}</div>
+        </div>
+        <div class="person-pct ${tier}">${fmtPct(d.pct_net_target)}</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      <div class="person-metrics">
+        <div><span class="pm-label">เป้าขาย</span><span class="pm-value">${fmtMB(d.target_mb)} MB</span></div>
+        <div><span class="pm-label">ยอดขาย Net</span><span class="pm-value">${fmtMB(d.net_mb)} MB</span></div>
+        <div><span class="pm-label">Unit เป้า</span><span class="pm-value">${fmtNum(d.target_unit)}</span></div>
+        <div><span class="pm-label">Unit Net</span><span class="pm-value">${fmtNum(d.net_unit)}</span></div>
+        <div><span class="pm-label">Walk</span><span class="pm-value">${fmtNum(d.walk)}</span></div>
+        <div><span class="pm-label">Register</span><span class="pm-value">${fmtNum(d.register)}</span></div>
+        <div><span class="pm-label">%CS1</span><span class="pm-value">${fmtPct(d.cs1_pct)}</span></div>
+        <div><span class="pm-label">%CS2</span><span class="pm-value">${fmtPct(d.cs2_pct)}</span></div>
+        <div class="full">
+          <span class="pm-label">Diff เทียบเป้า</span>
+          <span class="pm-value" style="color:${d.diff_mb<0?'var(--red)':'var(--teal)'};">${fmtMB(d.diff_mb)} MB</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Table ----------
+function pctPillClass(v){
+  if(v>=90) return 'pct-good';
+  if(v>=60) return 'pct-mid';
+  return 'pct-bad';
+}
+
+function renderTable(data){
+  const body = document.getElementById('tableBody');
+  const emptyState = document.getElementById('emptyState');
+  const tableScroll = document.querySelector('.table-scroll');
+  if(data.length===0){
+    emptyState.style.display='block';
+    tableScroll.style.display='none';
+    body.innerHTML='';
+    return;
+  }
+  emptyState.style.display='none';
+  tableScroll.style.display='block';
+  const sorted = [...data].sort((a,b)=>{
+    let av=a[sortKey], bv=b[sortKey];
+    if(typeof av==='string') return sortDir==='asc'? av.localeCompare(bv): bv.localeCompare(av);
+    return sortDir==='asc'? av-bv : bv-av;
+  });
+  body.innerHTML = sorted.map(d=>`
+    <tr>
+      <td>${d.no}</td>
+      <td class="name-cell">${d.name}</td>
+      <td>${fmtNum(d.target_unit)}</td>
+      <td>${fmtMB(d.target_mb)}</td>
+      <td>${fmtNum(d.sales_unit)}</td>
+      <td>${fmtMB(d.sales_mb)}</td>
+      <td><span class="pct-pill ${pctPillClass(d.pct_target)}">${fmtPct(d.pct_target)}</span></td>
+      <td>${fmtNum(d.b2b_unit)}</td>
+      <td>${fmtMB(d.b2b_mb)}</td>
+      <td>${fmtNum(d.net_unit)}</td>
+      <td>${fmtMB(d.net_mb)}</td>
+      <td><span class="pct-pill ${pctPillClass(d.pct_net_target)}">${fmtPct(d.pct_net_target)}</span></td>
+      <td class="${d.diff_unit<0?'diff-neg':'diff-pos'}">${fmtNum(d.diff_unit)}</td>
+      <td class="${d.diff_mb<0?'diff-neg':'diff-pos'}">${fmtMB(d.diff_mb)}</td>
+      <td>${fmtNum(d.walk)}</td>
+      <td>${d.ratio_walk_book}</td>
+      <td>${fmtNum(d.register)}</td>
+      <td>${d.ratio_lead_walk}</td>
+      <td>${fmtPct(d.cs1_pct)}</td>
+      <td>${fmtPct(d.cs2_pct)}</td>
+      <td>${fmtPct(d.cs1_score)}</td>
+      <td>${fmtPct(d.cs2_score)}</td>
+    </tr>`).join('');
+}
+
+document.querySelectorAll('thead th[data-key]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key;
+    if(sortKey===key) sortDir = sortDir==='asc'?'desc':'asc';
+    else { sortKey=key; sortDir='desc'; }
+    document.querySelectorAll('thead th[data-key]').forEach(t=>t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    updateAll();
+  });
+});
+
+// ---------- Master update ----------
+function updateAll(){
+  updateFilterLabel();
+  const data = RAW_DATA.filter(d=>selected.has(d.no));
+  renderTable(data);
+  renderKPIs(data);
+  renderPersonCards(data);
+}
+
+updateAll();
+</script>
+</body>
+</html>
