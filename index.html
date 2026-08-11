@@ -348,11 +348,11 @@ function renderPersonCards(data){
   const grid = document.getElementById('personGrid');
   document.getElementById('personCountBadge').textContent = `${data.length} คน`;
   if(data.length===0){ grid.innerHTML=''; return; }
-  const sorted = [...data].sort((a,b)=>b.pct_net_target - a.pct_net_target);
+  const sorted = [...data].sort((a,b)=>b.pct_target - a.pct_target);
   grid.innerHTML = sorted.map(d=>{
-    const tier = tierOf(d.pct_net_target);
+    const tier = tierOf(d.pct_target);
     const barColor = tier==='good'?'#0d9488':(tier==='mid'?'#d97706':'#dc2626');
-    const pct = Math.min(d.pct_net_target,100);
+    const pct = Math.min(d.pct_target,100);
     return `
     <div class="person-card ${tier==='good'?'':tier}">
       <div class="person-head">
@@ -360,21 +360,27 @@ function renderPersonCards(data){
           <div class="person-rank">#${d.no}</div>
           <div class="person-name">${d.name}</div>
         </div>
-        <div class="person-pct ${tier}">${fmtPct(d.pct_net_target)}</div>
+        <div class="person-pct ${tier}">${fmtPct(d.pct_target)}</div>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${barColor};"></div></div>
       <div class="person-metrics">
         <div><span class="pm-label">เป้าขาย</span><span class="pm-value">${fmtMB(d.target_mb)} MB</span></div>
-        <div><span class="pm-label">ยอดขาย Net</span><span class="pm-value">${fmtMB(d.net_mb)} MB</span></div>
         <div><span class="pm-label">Unit เป้า</span><span class="pm-value">${fmtNum(d.target_unit)}</span></div>
-        <div><span class="pm-label">Unit Net</span><span class="pm-value">${fmtNum(d.net_unit)}</span></div>
+        <div><span class="pm-label">ยอดขายรวม</span><span class="pm-value">${fmtMB(d.sales_mb)} MB</span></div>
+        <div><span class="pm-label">Unit ยอดขายรวม</span><span class="pm-value">${fmtNum(d.sales_unit)}</span></div>
+        <div><span class="pm-label">ยอดขาย Net (หัก B2B)</span><span class="pm-value">${fmtMB(d.net_mb)} MB</span></div>
+        <div><span class="pm-label">Unit Net (หัก B2B)</span><span class="pm-value">${fmtNum(d.net_unit)}</span></div>
         <div><span class="pm-label">Walk</span><span class="pm-value">${fmtNum(d.walk)}</span></div>
         <div><span class="pm-label">Register</span><span class="pm-value">${fmtNum(d.register)}</span></div>
         <div><span class="pm-label">%CS1</span><span class="pm-value">${fmtPct(d.cs1_pct)}</span></div>
         <div><span class="pm-label">%CS2</span><span class="pm-value">${fmtPct(d.cs2_pct)}</span></div>
         <div class="full">
-          <span class="pm-label">Diff เทียบเป้า</span>
-          <span class="pm-value" style="color:${d.diff_mb<0?'var(--red)':'var(--teal)'};">${fmtMB(d.diff_mb)} MB</span>
+          <span class="pm-label">% ยอดขาย/เทียบเป้ารวม</span>
+          <span class="pct-pill ${pctPillClass(d.pct_target)}">${fmtPct(d.pct_target)}</span>
+        </div>
+        <div class="full">
+          <span class="pm-label">% ยอดขาย Net/เทียบเป้ารวม</span>
+          <span class="pct-pill ${pctPillClass(d.pct_net_target)}">${fmtPct(d.pct_net_target)}</span>
         </div>
       </div>
     </div>`;
