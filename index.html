@@ -3,776 +3,456 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Head Sales Dashboard — All Star Team 2026</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<title>BU1 Sales Performance Dashboard — Q2 2026</title>
 <style>
   :root{
-    --bg-page:#f2f4f7;
-    --bg-card:#ffffff;
-    --accent:#2e75b6;
-    --positive:#1e8e3e;
-    --negative:#c62828;
-    --text-primary:#1a2233;
-    --text-secondary:#667085;
-    --text-on-dark:#ffffff;
+    --navy:#12233f;
+    --navy-light:#1c3760;
+    --teal:#0d9488;
+    --teal-light:#14b8a6;
+    --amber:#d97706;
+    --red:#dc2626;
+    --bg:#f3f5f8;
+    --card:#ffffff;
+    --border:#e3e8ef;
+    --text:#1a2333;
+    --text-sub:#5b6779;
     --radius:12px;
-    --gap:16px;
+    --shadow:0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    font-family:'Sarabun','Noto Sans Thai','Segoe UI',system-ui,sans-serif;
   }
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
   *{box-sizing:border-box;}
-  body{margin:0;font-family:"Segoe UI","Noto Sans Thai",Arial,sans-serif;background:var(--bg-page);color:var(--text-primary);}
-  .dashboard-container{max-width:1450px;margin:0 auto;padding:20px;}
-  .dashboard-header{
-    background:linear-gradient(135deg,#12233f,#1f4e78);color:var(--text-on-dark);
-    padding:22px 28px;border-radius:var(--radius);margin-bottom:var(--gap);
-    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1440px;margin:0 auto;padding:20px;}
+
+  /* header */
+  header.top{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+    color:#fff;border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;
+    box-shadow:var(--shadow);
   }
-  .dashboard-header h1{font-size:21px;font-weight:700;margin:0 0 4px 0;}
-  .dashboard-header p{margin:0;font-size:13px;color:rgba(255,255,255,.75);}
-  .filters{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
-  .filter-group{display:flex;flex-direction:column;gap:4px;}
-  .filters label{font-size:11px;color:rgba(255,255,255,.7);}
-  .filters select{
-    padding:7px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.25);
-    background:rgba(255,255,255,.12);color:#fff;font-size:13px;min-width:150px;
+  header.top .row1{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+  header.top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:.2px;}
+  header.top .sub{margin-top:4px;font-size:13px;color:#c7d2e0;}
+  .badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+    padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+
+  /* filter */
+  .filter-wrap{position:relative;}
+  .filter-btn{
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;
+    padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;
+    font-weight:500;min-width:220px;justify-content:space-between;
   }
-  .filters select option{background:#12233f;color:#fff;}
-  .filters select:disabled{opacity:.4;cursor:not-allowed;}
-
-  .info-banner{
-    background:#fff8e6;border:1px solid #f2d488;color:#8a6100;border-radius:10px;
-    padding:10px 16px;font-size:12.5px;margin-bottom:var(--gap);display:none;
+  .filter-btn:hover{background:rgba(255,255,255,.2);}
+  .chev{transition:transform .15s;}
+  .filter-btn.open .chev{transform:rotate(180deg);}
+  .filter-panel{
+    display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;color:var(--text);
+    border-radius:10px;box-shadow:0 10px 30px rgba(16,24,40,.25);width:320px;z-index:50;
+    border:1px solid var(--border);overflow:hidden;
   }
-  .info-banner.show{display:block;}
+  .filter-panel.open{display:block;}
+  .filter-search{padding:10px;border-bottom:1px solid var(--border);}
+  .filter-search input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;}
+  .filter-actions{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);background:#f8fafc;}
+  .filter-actions button{background:none;border:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;}
+  .filter-actions button:hover{text-decoration:underline;}
+  .filter-list{max-height:320px;overflow-y:auto;padding:6px 4px;}
+  .filter-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
+  .filter-item:hover{background:#f1f5f9;}
+  .filter-item input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;flex:none;}
+  .filter-item span.rank{color:var(--text-sub);font-size:11px;width:18px;flex:none;}
+  .filter-footer{padding:8px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-sub);background:#f8fafc;}
 
-  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:var(--gap);}
-  .kpi-card{background:var(--bg-card);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid var(--accent);}
-  .kpi-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
-  .kpi-value{font-size:22px;font-weight:800;color:var(--text-primary);line-height:1.1;}
+  /* KPI */
+  .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px;}
+  .kpi-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);}
+  .kpi-label{font-size:11.5px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+  .kpi-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1.15;}
+  .kpi-sub{font-size:12px;margin-top:5px;font-weight:600;}
+  .kpi-sub.pos{color:var(--teal);}
+  .kpi-sub.neg{color:var(--red);}
+  .kpi-sub.neutral{color:var(--text-sub);font-weight:500;}
 
-  .section-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:22px 0 10px 2px;}
+  /* charts */
+  .chart-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px;}
+  .chart-row.second{grid-template-columns:1fr 1fr;}
+  .card{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+  .card h3{margin:0 0 3px 0;font-size:14.5px;font-weight:700;color:var(--navy);}
+  .card p.hint{margin:0 0 12px 0;font-size:12px;color:var(--text-sub);}
+  .chart-holder{position:relative;}
+  .chart-holder.tall{height:420px;}
+  .chart-holder.mid{height:300px;}
 
-  .chart-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:var(--gap);margin-bottom:var(--gap);}
-  .chart-container{background:var(--bg-card);border-radius:var(--radius);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .chart-container h3{font-size:14px;font-weight:700;color:var(--text-primary);margin:0 0 4px 0;}
-  .chart-container .chart-note{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px 0;}
-  .chart-container canvas{max-height:290px;}
+  /* person cards */
+  .person-section{margin-bottom:18px;}
+  .person-section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+  .person-section-head h2{margin:0;font-size:16px;font-weight:700;color:var(--navy);}
+  .person-section-head p{margin:2px 0 0 0;font-size:12px;color:var(--text-sub);}
+  .person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .person-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border);border-top:4px solid var(--teal);}
+  .person-card.mid{border-top-color:var(--amber);}
+  .person-card.low{border-top-color:var(--red);}
+  .person-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+  .person-name{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.3;}
+  .person-rank{font-size:11px;color:var(--text-sub);font-weight:600;}
+  .person-pct{font-size:20px;font-weight:800;flex:none;}
+  .person-pct.good{color:var(--teal);}
+  .person-pct.mid{color:var(--amber);}
+  .person-pct.low{color:var(--red);}
+  .progress-track{height:7px;background:#e9edf3;border-radius:10px;overflow:hidden;margin-bottom:12px;}
+  .progress-fill{height:100%;border-radius:10px;}
+  .person-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12px;}
+  .pm-label{color:var(--text-sub);}
+  .pm-value{font-weight:700;color:var(--text);float:right;}
+  .person-metrics .full{grid-column:1/-1;display:flex;justify-content:space-between;border-top:1px dashed var(--border);padding-top:7px;margin-top:2px;}
 
-  .table-section{background:var(--bg-card);border-radius:var(--radius);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow-x:auto;margin-bottom:var(--gap);}
-  .table-section h3{font-size:14px;font-weight:700;margin:0 0 4px 0;}
-  .table-section .chart-note{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px 0;}
-  table.data-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1000px;}
-  .data-table thead th{
-    text-align:left;padding:9px 10px;border-bottom:2px solid #e3e7ee;color:var(--text-secondary);
-    font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;user-select:none;white-space:nowrap;
+  /* table */
+  .table-card{background:var(--card);border-radius:var(--radius);padding:18px 20px 6px 20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px;}
+  .table-scroll{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:12px;min-width:1500px;}
+  thead th{
+    background:#eef2f7;text-align:center;padding:8px 9px;border:1px solid #d7dee8;
+    font-size:11px;color:var(--navy);font-weight:700;white-space:nowrap;
   }
-  .data-table thead th:hover{color:var(--text-primary);background:#f8f9fb;}
-  .data-table tbody td{padding:9px 10px;border-bottom:1px solid #f1f2f5;white-space:nowrap;}
-  .data-table tbody tr:hover{background:#f8f9fb;}
-  .name-cell{font-weight:600;}
-  .pct-pill{padding:3px 9px;border-radius:20px;font-weight:700;font-size:12px;display:inline-block;}
-  .pct-good{background:#e6f4ea;color:var(--positive);}
-  .pct-mid{background:#fff4e0;color:#b3690a;}
-  .pct-bad{background:#fde8e8;color:var(--negative);}
-  .bar-wrap{position:relative;background:#eef1f5;border-radius:6px;height:8px;width:100px;overflow:hidden;}
-  .bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:6px;}
+  thead tr.grp th{background:#e3e9f2;font-size:11.5px;}
+  thead tr.grp th.sortable{cursor:pointer;}
+  thead tr.grp th.sortable:hover{color:var(--teal);}
+  thead tr.grp th.sortable.sorted{color:var(--teal);background:#dcf4f1;}
+  thead tr.sub th{background:#f4f7fa;font-size:10.5px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.3px;cursor:pointer;}
+  thead tr.sub th:hover{color:var(--teal);background:#eaf5f3;}
+  thead tr.sub th.sorted{color:var(--teal);background:#dcf4f1;}
+  tbody td{padding:7px 9px;border:1px solid #eef1f5;text-align:right;white-space:nowrap;}
+  tbody td:nth-child(1), tbody td:nth-child(2){text-align:left;}
+  tbody tr:hover{background:#f8fafc;}
+  .name-cell{font-weight:600;color:var(--text);}
+  .pct-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-weight:700;font-size:12px;}
+  .pct-good{background:#d1fae5;color:#047857;}
+  .pct-mid{background:#fef3c7;color:#b45309;}
+  .pct-bad{background:#fee2e2;color:#b91c1c;}
+  .diff-neg{color:var(--red);font-weight:600;}
+  .diff-pos{color:var(--teal);font-weight:600;}
 
-  .view-section{display:none;}
-  .view-section.active{display:block;}
+  footer.foot{text-align:center;font-size:12px;color:var(--text-sub);padding:16px 0 8px;}
 
-  .dashboard-footer{text-align:center;color:var(--text-secondary);font-size:12px;padding:14px 0 4px;}
-  @media (max-width:768px){
-    .dashboard-header{flex-direction:column;align-items:flex-start;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-sub);font-size:14px;}
+
+  @media (max-width:1100px){
+    .kpi-row{grid-template-columns:repeat(3,1fr);}
+    .chart-row, .chart-row.second{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
     .kpi-row{grid-template-columns:repeat(2,1fr);}
-    .chart-row{grid-template-columns:1fr;}
   }
 </style>
 </head>
 <body>
-<div class="dashboard-container">
+<div class="wrap">
 
-  <header class="dashboard-header">
-    <div>
-      <h1>🎯 Head Sales Dashboard — All Star Team</h1>
-      <p>Period: 1 May 2026 – 31 July 2026 &nbsp;|&nbsp; Source: Per_1MAY26_31JUL26</p>
-    </div>
-    <div class="filters">
-      <div class="filter-group">
-        <label for="monthFilter">เดือน</label>
-        <select id="monthFilter">
-          <option value="ALL">รวม 3 เดือน (May-Jul)</option>
-          <option value="May">May 2026</option>
-          <option value="June">June 2026</option>
-          <option value="July">July 2026</option>
-        </select>
+  <header class="top">
+    <div class="row1">
+      <div>
+        <h1>BU1 Sales Performance Dashboard</h1>
+        <div class="sub">AssetWise · Business Unit 1 · <span class="badge" id="period-badge">Period: May – July 2026</span></div>
       </div>
-      <div class="filter-group">
-        <label for="projectFilter">โครงการ</label>
-        <select id="projectFilter">
-          <option value="ALL">ทั้งหมด (ภาพรวม)</option>
-          <option value="KAVALON">KAVALON</option>
-          <option value="ATMOZ">ATMOZ DESOL</option>
-          <option value="MODIZ_AVG">MODIZ AVG</option>
-          <option value="KAVE_WDL">KAVE WDL</option>
-          <option value="MAROON32">MAROON 32</option>
-          <option value="KAVE_CNV">KAVE CNV</option>
-          <option value="ATMOZ_KANAAL">ATMOZ KANAAL</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="personFilter">พนักงานขาย</label>
-        <select id="personFilter">
-          <option value="ALL">พนักงานขายทั้งหมด</option>
-        </select>
+      <div class="filter-wrap">
+        <button class="filter-btn" id="filterBtn">
+          <span id="filterBtnLabel">พนักงานขายทั้งหมด (21)</span>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="filter-panel" id="filterPanel">
+          <div class="filter-search"><input type="text" id="searchInput" placeholder="ค้นหารายชื่อพนักงานขาย..."></div>
+          <div class="filter-actions">
+            <button id="selectAllBtn">✓ เลือกทั้งหมด</button>
+            <button id="clearAllBtn">✕ ล้างการเลือก</button>
+          </div>
+          <div class="filter-list" id="filterList"></div>
+          <div class="filter-footer"><span id="filterCountLabel">เลือก 21 / 21 คน</span></div>
+        </div>
       </div>
     </div>
   </header>
 
-  <div class="info-banner" id="infoBanner"></div>
-
-  <!-- ============== OVERVIEW (project = ALL) ============== -->
-  <section id="viewOverview" class="view-section">
-    <section class="kpi-row" id="kpiRow"></section>
-
-    <div class="section-title">ยอดขาย &amp; เป้าหมาย</div>
-    <section class="chart-row">
-      <div class="chart-container">
-        <h3 id="chartTAtitle">Target vs Actual Sales by Month (Unit)</h3>
-        <p class="chart-note" id="chartTAnote">ตัวเลขรวมทั้งทีม แยกตามเดือน</p>
-        <canvas id="chartTargetActual"></canvas>
-      </div>
-      <div class="chart-container">
-        <h3>% Achievement Trend by Sales Person</h3>
-        <p class="chart-note">แนวโน้ม % ทำเป้าของแต่ละคน รายเดือน</p>
-        <canvas id="chartTrend"></canvas>
-      </div>
-    </section>
-
-    <div class="section-title">Lead &amp; Conversion</div>
-    <section class="chart-row">
-      <div class="chart-container">
-        <h3 id="chartRCtitle">Register vs Chat by Month</h3>
-        <p class="chart-note" id="chartRCnote">จำนวน Register / Chat รวมทั้งทีม แยกตามเดือน</p>
-        <canvas id="chartRegisChat"></canvas>
-      </div>
-      <div class="chart-container">
-        <h3>Ratio Lead:Walk &amp; Ratio Walk:Book by Person</h3>
-        <p class="chart-note">เดือนที่เลือกด้านบน — Ratio Lead:Walk คำนวณจากผลรวมจริง KAVALON+ATMOZ DESOL | ยิ่งค่าสูง ยิ่งต้องใช้ Lead/Walk-in มากขึ้นต่อ 1 การปิดขาย</p>
-        <canvas id="chartRatios"></canvas>
-      </div>
-    </section>
-
-    <div class="section-title">Ranking &amp; คุณภาพงานขาย (CS)</div>
-    <section class="chart-row">
-      <div class="chart-container">
-        <h3>Sales Ranking — Target vs Actual (Unit)</h3>
-        <p class="chart-note">เดือนที่เลือกด้านบน เรียงจาก % Achievement สูง→ต่ำ</p>
-        <canvas id="chartRanking"></canvas>
-      </div>
-      <div class="chart-container">
-        <h3>% การทำ CS1 / CS2 &amp; คะแนน CS1 / CS2 by Person</h3>
-        <p class="chart-note">⚠️ ข้อมูล CS มีเฉพาะยอดสะสม 3 เดือน (May–Jul) ในไฟล์ต้นฉบับ ไม่มีแยกรายเดือน</p>
-        <canvas id="chartCS"></canvas>
-      </div>
-    </section>
-
-    <section class="table-section">
-      <h3>ตารางรายละเอียดรายบุคคล (ภาพรวม)</h3>
-      <p class="chart-note">เดือนที่เลือกด้านบน — คลิกหัวคอลัมน์เพื่อจัดเรียง | คอลัมน์ CS เป็นข้อมูลสะสม 3 เดือนเสมอ | คอลัมน์ Total Lead/Register/Chat/Ratio Lead:Walk เป็นผลรวมจริงของ KAVALON + ATMOZ DESOL</p>
-      <table class="data-table" id="detailTable">
+  <section class="table-card">
+    <h3 style="margin-bottom:2px;">รายละเอียด Sales Performance รายบุคคล — Sales ทั้งหมด</h3>
+    <p class="hint">แสดงข้อมูลทุกคนก่อนเป็นค่าเริ่มต้น — ใช้ตัวกรอง "พนักงานขาย" ที่มุมขวาบนเพื่อเลือกดูเฉพาะบางคน · คลิกที่หัวคอลัมน์เพื่อเรียงลำดับ</p>
+    <div class="table-scroll">
+      <table id="dataTable">
         <thead>
-          <tr>
-            <th data-key="name">Sales Name</th>
-            <th data-key="target_unit">Target (Unit)</th>
-            <th data-key="actual_unit">Actual (Unit)</th>
-            <th data-key="pct">% Achievement</th>
-            <th data-key="target_mb">Target (MB)</th>
-            <th data-key="actual_mb">Actual (MB)</th>
-            <th data-key="walkin">Walk-in</th>
-            <th data-key="total_lead_combined">Total Lead</th>
-            <th data-key="regis_combined">Register</th>
-            <th data-key="chat_combined">Chat</th>
-            <th data-key="ratio_lead_walk_combined">Ratio Lead:Walk</th>
-            <th data-key="ratio_walk_book">Ratio Walk:Book</th>
-            <th data-key="cs1_pct">% CS1</th>
-            <th data-key="cs2_pct">% CS2</th>
-            <th data-key="cs1_score">คะแนน CS1</th>
-            <th data-key="cs2_score">คะแนน CS2</th>
+          <tr class="grp">
+            <th rowspan="2" data-key="no" class="sortable">NO</th>
+            <th rowspan="2" data-key="name" class="sortable">Sale</th>
+            <th colspan="2">เป้าขาย รวม<br>(Working Target)</th>
+            <th colspan="2">ยอดขายรวม</th>
+            <th rowspan="2" data-key="pct_target" class="sortable">% ยอดขาย/เทียบเป้ารวม<br>(เทียบ VALUE)</th>
+            <th colspan="2">Sold by B2B</th>
+            <th colspan="2">ยอดขายรวม<br>(หัก B2B)</th>
+            <th rowspan="2" data-key="pct_net_target" class="sortable">% ยอดขาย NET/<br>เทียบเป้ารวม<br>(เทียบ VALUE)</th>
+            <th rowspan="2" data-key="diff_unit" class="sortable">Diff Target<br>(Unit)</th>
+            <th rowspan="2" data-key="diff_mb" class="sortable">Diff Target<br>(MB)</th>
+            <th rowspan="2" data-key="walk" class="sortable">Walk</th>
+            <th>Ratio</th>
+            <th rowspan="2" data-key="register" class="sortable">Register<br>(ตัด F)</th>
+            <th>Ratio</th>
+            <th colspan="2">% การทำ CS 1-2<br>(รวม 3 เดือน)</th>
+            <th colspan="2">คะแนนเฉลี่ย CS1-2<br>(รวม 3 เดือน)</th>
+          </tr>
+          <tr class="sub">
+            <th data-key="target_unit">Unit</th>
+            <th data-key="target_mb">MB</th>
+            <th data-key="sales_unit">Unit</th>
+            <th data-key="sales_mb">MB</th>
+            <th data-key="b2b_unit">Unit</th>
+            <th data-key="b2b_mb">MB</th>
+            <th data-key="net_unit">Unit</th>
+            <th data-key="net_mb">MB</th>
+            <th data-key="ratio_walk_book">Walk : Book</th>
+            <th data-key="ratio_lead_walk">Lead : Walk</th>
+            <th data-key="cs1_pct">CS1</th>
+            <th data-key="cs2_pct">CS2</th>
+            <th data-key="cs1_score">CS1</th>
+            <th data-key="cs2_score">CS2</th>
           </tr>
         </thead>
-        <tbody id="detailTbody"></tbody>
+        <tbody id="tableBody"></tbody>
       </table>
-    </section>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none;">ไม่มีข้อมูลที่ตรงกับตัวกรอง — กรุณาเลือกพนักงานขายอย่างน้อย 1 คน</div>
   </section>
 
-  <!-- ============== PROJECT VIEW: KAVALON / ATMOZ (has target + B2B) ============== -->
-  <section id="viewProjectMain" class="view-section">
-    <section class="kpi-row" id="kpiRowProject"></section>
+  <section class="kpi-row" id="kpiRow"></section>
 
-    <div class="section-title" id="projMainSectionTitle">เป้าขาย &amp; ยอดขายสะสม (หัก B2B) รายคน</div>
-    <section class="chart-row">
-      <div class="chart-container">
-        <h3 id="projChart1Title">Target vs ยอดขายสะสม (หัก B2B) by Person</h3>
-        <p class="chart-note">เดือนที่เลือกด้านบน — เป้าขายเทียบกับยอดขายสะสมหลังหักยอดที่ขายผ่าน B2B</p>
-        <canvas id="chartProjTargetNet"></canvas>
+  <section class="person-section">
+    <div class="person-section-head">
+      <div>
+        <h2>ผลงานรายบุคคล (Sales ที่เลือก)</h2>
+        <p>แสดงทุกคนที่เลือกไว้ในหน้าเดียว เรียงจาก % ความสำเร็จเป้าสูง → ต่ำ</p>
       </div>
-      <div class="chart-container">
-        <h3 id="projChart2Title">ยอดขายรวม vs ขายผ่าน B2B vs ยอดขายสะสม (หัก B2B) by Person</h3>
-        <p class="chart-note">แสดงสัดส่วนยอดขายที่มาจาก B2B เทียบกับยอดขายที่ทีมปิดเอง</p>
-        <canvas id="chartProjB2B"></canvas>
-      </div>
-    </section>
-
-    <section class="table-section">
-      <h3 id="projTableTitle">ตารางรายละเอียดรายบุคคล — โครงการ</h3>
-      <p class="chart-note">เดือนที่เลือกด้านบน — คลิกหัวคอลัมน์เพื่อจัดเรียง</p>
-      <table class="data-table" id="projDetailTable">
-        <thead>
-          <tr>
-            <th data-key="name">Sales Name</th>
-            <th data-key="target_unit">Target (Unit)</th>
-            <th data-key="target_mb">Target (MB)</th>
-            <th data-key="actual_unit">ยอดขายรวม (Unit)</th>
-            <th data-key="actual_mb">ยอดขายรวม (MB)</th>
-            <th data-key="b2b_unit">ขายผ่าน B2B (Unit)</th>
-            <th data-key="b2b_mb">ขายผ่าน B2B (MB)</th>
-            <th data-key="net_unit">ยอดขายสะสม หัก B2B (Unit)</th>
-            <th data-key="net_mb">ยอดขายสะสม หัก B2B (MB)</th>
-            <th data-key="pct">% Achievement</th>
-            <th data-key="walkin">Walk-in</th>
-            <th data-key="total_lead">Total Lead</th>
-            <th data-key="regis">Register</th>
-            <th data-key="chat">Chat</th>
-            <th data-key="ratio_lead_walk">Ratio Lead:Walk</th>
-            <th data-key="ratio_walk_book">Ratio Walk:Book</th>
-          </tr>
-        </thead>
-        <tbody id="projDetailTbody"></tbody>
-      </table>
-    </section>
+      <span class="badge" id="personCountBadge" style="background:#eef2f7;color:var(--navy);border:1px solid var(--border);">0 คน</span>
+    </div>
+    <div class="person-grid" id="personGrid"></div>
   </section>
 
-  <!-- ============== PROJECT VIEW: small cumulative-only projects ============== -->
-  <section id="viewProjectSmall" class="view-section">
-    <section class="kpi-row" id="kpiRowSmall"></section>
-
-    <div class="section-title">ยอดขายสะสม รายคน</div>
-    <section class="chart-row">
-      <div class="chart-container" style="grid-column:1/-1;">
-        <h3 id="smallChartTitle">ยอดขายสะสม by Person</h3>
-        <p class="chart-note">⚠️ โครงการนี้มีเฉพาะข้อมูลยอดขายสะสม 3 เดือน (May–Jul) ในไฟล์ต้นฉบับ ไม่มีเป้าขายและไม่มีแยกรายเดือน</p>
-        <canvas id="chartSmallProject"></canvas>
-      </div>
-    </section>
-
-    <section class="table-section">
-      <h3 id="smallTableTitle">ตารางยอดขายสะสมรายคน</h3>
-      <table class="data-table" id="smallDetailTable" style="min-width:400px;">
-        <thead>
-          <tr>
-            <th data-key="name">Sales Name</th>
-            <th data-key="unit">Unit</th>
-            <th data-key="mb">MB</th>
-          </tr>
-        </thead>
-        <tbody id="smallDetailTbody"></tbody>
-      </table>
-    </section>
-  </section>
-
-  <footer class="dashboard-footer">
-    Head Sales Dashboard — Generated from "Target All Star" tracker &nbsp;|&nbsp; Data as of period : May - July 2026
-  </footer>
+  <footer class="foot">AssetWise BU1 · Sales Performance Dashboard · จัดทำจากไฟล์ BU1_Q2_2026.xlsx · Period: May – July 2026</footer>
 </div>
 
 <script>
-Chart.register(ChartDataLabels);
+const RAW_DATA = [{"no": 1, "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 41, "target_mb": 93187521.22, "sales_unit": 24, "sales_mb": 51914000, "pct_target": 55.71, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 24, "net_mb": 51914000, "pct_net_target": 55.71, "diff_unit": -17, "diff_mb": -41273521.22, "walk": 21, "ratio_walk_book": 6.33, "register": 133, "ratio_lead_walk": "6 : 1", "cs1_pct": 99.25, "cs2_pct": 98.92, "cs1_score": 99.22, "cs2_score": 100}, {"no": 2, "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 39, "target_mb": 89161358.23, "sales_unit": 27, "sales_mb": 60294520, "pct_target": 67.62, "b2b_unit": 1, "b2b_mb": 2740000, "net_unit": 26, "net_mb": 57554520, "pct_net_target": 64.55, "diff_unit": -13, "diff_mb": -31606838.23, "walk": 24, "ratio_walk_book": 8, "register": 192, "ratio_lead_walk": "8 : 1", "cs1_pct": 82.76, "cs2_pct": 140.0, "cs1_score": 99.71, "cs2_score": 99.82}, {"no": 3, "name": "รัตนา คงซัง (เอ๋)", "target_unit": 38, "target_mb": 86035466.88, "sales_unit": 20.5, "sales_mb": 50267000, "pct_target": 58.43, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 19.5, "net_mb": 45705000, "pct_net_target": 53.12, "diff_unit": -18.5, "diff_mb": -40330466.88, "walk": 24, "ratio_walk_book": 4.83, "register": 116, "ratio_lead_walk": "5 : 1", "cs1_pct": 96.0, "cs2_pct": 115.38, "cs1_score": 97.73, "cs2_score": 99.85}, {"no": 4, "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 39, "target_mb": 88525466.88, "sales_unit": 23, "sales_mb": 52920100, "pct_target": 59.78, "b2b_unit": 1, "b2b_mb": 3810000, "net_unit": 22, "net_mb": 49110100, "pct_net_target": 55.48, "diff_unit": -17, "diff_mb": -39415366.88, "walk": 29, "ratio_walk_book": 3.93, "register": 114, "ratio_lead_walk": "4 : 1", "cs1_pct": 90.63, "cs2_pct": 115.38, "cs1_score": 98.23, "cs2_score": 97.11}, {"no": 5, "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 40, "target_mb": 92021011.9, "sales_unit": 19.5, "sales_mb": 41605100, "pct_target": 45.21, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 19.5, "net_mb": 41605100, "pct_net_target": 45.21, "diff_unit": -20.5, "diff_mb": -50415911.9, "walk": 28, "ratio_walk_book": 6.71, "register": 188, "ratio_lead_walk": "7 : 1", "cs1_pct": 90.32, "cs2_pct": 106.25, "cs1_score": 97.74, "cs2_score": 96.8}, {"no": 6, "name": "กิ่งกาญจน์ ตรุษจา", "target_unit": 59, "target_mb": 113160000, "sales_unit": 38, "sales_mb": 81463767.25, "pct_target": 71.99, "b2b_unit": 5, "b2b_mb": 11325212, "net_unit": 33, "net_mb": 70138555.25, "pct_net_target": 61.98, "diff_unit": -26, "diff_mb": -43021444.75, "walk": 58, "ratio_walk_book": 1.53, "register": 228, "ratio_lead_walk": "4 : 1", "cs1_pct": 87.93, "cs2_pct": 69.44, "cs1_score": 98.33, "cs2_score": 97.79}, {"no": 7, "name": "กิติยา กัญยะโสภา", "target_unit": 59, "target_mb": 113160000, "sales_unit": 58, "sales_mb": 126033670, "pct_target": 111.38, "b2b_unit": 18, "b2b_mb": 36903197, "net_unit": 40, "net_mb": 89130473, "pct_net_target": 78.76, "diff_unit": -19, "diff_mb": -24029527, "walk": 76, "ratio_walk_book": 1.31, "register": 119, "ratio_lead_walk": "2 : 1", "cs1_pct": 53.95, "cs2_pct": 97.62, "cs1_score": 95.42, "cs2_score": 89.57}, {"no": 8, "name": "ชนัญชิดา เกิดกล้า", "target_unit": 59, "target_mb": 113160000, "sales_unit": 43, "sales_mb": 98720723, "pct_target": 87.24, "b2b_unit": 9, "b2b_mb": 20031160, "net_unit": 34, "net_mb": 78689563, "pct_net_target": 69.54, "diff_unit": -25, "diff_mb": -34470437, "walk": 68, "ratio_walk_book": 1.58, "register": 157, "ratio_lead_walk": "2 : 1", "cs1_pct": 45.59, "cs2_pct": 50.0, "cs1_score": 97.17, "cs2_score": 100}, {"no": 9, "name": "ชนิภรณ์ ชิณวงศ์", "target_unit": 62, "target_mb": 115460000, "sales_unit": 63, "sales_mb": 142320031.4, "pct_target": 123.26, "b2b_unit": 23, "b2b_mb": 45824495, "net_unit": 40, "net_mb": 96495536.4, "pct_net_target": 83.57, "diff_unit": -22, "diff_mb": -18964463.6, "walk": 78, "ratio_walk_book": 1.24, "register": 105, "ratio_lead_walk": "1 : 1", "cs1_pct": 52.56, "cs2_pct": 54.55, "cs1_score": 99.58, "cs2_score": 98.62}, {"no": 10, "name": "นิตยา สารักษ์", "target_unit": 59, "target_mb": 113160000, "sales_unit": 61, "sales_mb": 130314694.1, "pct_target": 115.16, "b2b_unit": 17, "b2b_mb": 34525973, "net_unit": 44, "net_mb": 95788721.1, "pct_net_target": 84.65, "diff_unit": -15, "diff_mb": -17371278.9, "walk": 83, "ratio_walk_book": 1.36, "register": 139, "ratio_lead_walk": "2 : 1", "cs1_pct": 49.4, "cs2_pct": 41.67, "cs1_score": 97.29, "cs2_score": 97.97}, {"no": 11, "name": "สุภารัตน์ ชุมพงศ์", "target_unit": 59, "target_mb": 113160000, "sales_unit": 58, "sales_mb": 131697578.5, "pct_target": 116.38, "b2b_unit": 18, "b2b_mb": 40925007, "net_unit": 40, "net_mb": 90772571.5, "pct_net_target": 80.22, "diff_unit": -19, "diff_mb": -22387428.5, "walk": 60, "ratio_walk_book": 1.03, "register": 114, "ratio_lead_walk": "2 : 1", "cs1_pct": 68.33, "cs2_pct": 65.22, "cs1_score": 95.0, "cs2_score": 97.32}, {"no": 12, "name": "นภัทร ศิริกุลธนะสุข", "target_unit": 34, "target_mb": 76070000, "sales_unit": 26, "sales_mb": 71180000, "pct_target": 93.57, "b2b_unit": 4, "b2b_mb": 10130000, "net_unit": 22, "net_mb": 61050000, "pct_net_target": 80.26, "diff_unit": -12, "diff_mb": -15020000, "walk": 44, "ratio_walk_book": 1.25, "register": 55, "ratio_lead_walk": "1 : 1", "cs1_pct": 50.0, "cs2_pct": 57.0, "cs1_score": 89.67, "cs2_score": 93.75}, {"no": 13, "name": "นํ้าฝน แสงนวล", "target_unit": 31, "target_mb": 71230000, "sales_unit": 22, "sales_mb": 59940000, "pct_target": 84.15, "b2b_unit": 5, "b2b_mb": 14240000, "net_unit": 17, "net_mb": 45700000, "pct_net_target": 64.16, "diff_unit": -14, "diff_mb": -25530000, "walk": 37, "ratio_walk_book": 1.81, "register": 67, "ratio_lead_walk": "2 : 1", "cs1_pct": 80.0, "cs2_pct": 78.0, "cs1_score": 95.05, "cs2_score": 95.94}, {"no": 14, "name": "สกาวเดือน สายทองกู่", "target_unit": 36, "target_mb": 79300000, "sales_unit": 29, "sales_mb": 75120000, "pct_target": 94.73, "b2b_unit": 3, "b2b_mb": 10560000, "net_unit": 26, "net_mb": 64560000, "pct_net_target": 81.41, "diff_unit": -10, "diff_mb": -14740000, "walk": 37, "ratio_walk_book": 4.24, "register": 157, "ratio_lead_walk": "4 : 1", "cs1_pct": 57.0, "cs2_pct": 40.0, "cs1_score": 89.47, "cs2_score": 93.24}, {"no": 15, "name": "สันนดี ศิลา", "target_unit": 24, "target_mb": 78343912.65, "sales_unit": 31, "sales_mb": 91055000, "pct_target": 116.22, "b2b_unit": 18, "b2b_mb": 50483000, "net_unit": 13, "net_mb": 40572000, "pct_net_target": 51.79, "diff_unit": -11, "diff_mb": -37771912.65, "walk": 46, "ratio_walk_book": 5.96, "register": 274, "ratio_lead_walk": "6 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.08, "cs2_score": 98.44}, {"no": 16, "name": "ปนิตา แหวนจีน", "target_unit": 24, "target_mb": 78343912.65, "sales_unit": 22, "sales_mb": 57915000, "pct_target": 73.92, "b2b_unit": 8, "b2b_mb": 22195000, "net_unit": 14, "net_mb": 35720000, "pct_net_target": 45.59, "diff_unit": -10, "diff_mb": -42623912.65, "walk": 28, "ratio_walk_book": 8.32, "register": 233, "ratio_lead_walk": "8 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.01, "cs2_score": 100}, {"no": 17, "name": "ณเกษกมล จันทร์สว่าง", "target_unit": 15, "target_mb": 56501400, "sales_unit": 12, "sales_mb": 62566489.71, "pct_target": 110.73, "b2b_unit": 10, "b2b_mb": 56331489.71, "net_unit": 2, "net_mb": 6235000, "pct_net_target": 11.04, "diff_unit": -13, "diff_mb": -50266400, "walk": 19, "ratio_walk_book": 2.11, "register": 40, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 99.12, "cs2_score": 99.66}, {"no": 18, "name": "ภัทร์นรินทร์ ธกรกัณยาวีร์", "target_unit": 15, "target_mb": 56501400, "sales_unit": 18, "sales_mb": 56166464.08, "pct_target": 99.41, "b2b_unit": 12, "b2b_mb": 39906464.08, "net_unit": 6, "net_mb": 16260000, "pct_net_target": 28.78, "diff_unit": -9, "diff_mb": -40241400, "walk": 31, "ratio_walk_book": 2.06, "register": 64, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 98.8, "cs2_score": 99.58}, {"no": 19, "name": "ศุภรดา สุนันท์สถาพร", "target_unit": 15, "target_mb": 56501400, "sales_unit": 10, "sales_mb": 40418947, "pct_target": 71.54, "b2b_unit": 5, "b2b_mb": 26308947, "net_unit": 5, "net_mb": 14110000, "pct_net_target": 24.97, "diff_unit": -10, "diff_mb": -42391400, "walk": 17, "ratio_walk_book": 2.29, "register": 39, "ratio_lead_walk": "2 : 1", "cs1_pct": 100, "cs2_pct": 100, "cs1_score": 98.8, "cs2_score": 99.58}, {"no": 20, "name": "ไปรยา ลีรัตนขจร", "target_unit": 15, "target_mb": 56501400, "sales_unit": 8, "sales_mb": 35853749, "pct_target": 63.46, "b2b_unit": 7, "b2b_mb": 28873749, "net_unit": 1, "net_mb": 6980000, "pct_net_target": 12.35, "diff_unit": -14, "diff_mb": -49521400, "walk": 12, "ratio_walk_book": 2.5, "register": 30, "ratio_lead_walk": "3 : 1", "cs1_pct": 92.0, "cs2_pct": 82.0, "cs1_score": 98.57, "cs2_score": 99.37}, {"no": 21, "name": "รอยพิมพ์ เหล่าดี", "target_unit": 15, "target_mb": 56501400, "sales_unit": 7, "sales_mb": 19458000, "pct_target": 34.44, "b2b_unit": 2, "b2b_mb": 7200000, "net_unit": 5, "net_mb": 12258000, "pct_net_target": 21.7, "diff_unit": -10, "diff_mb": -44243400, "walk": 15, "ratio_walk_book": 3.47, "register": 52, "ratio_lead_walk": "3 : 1", "cs1_pct": 85.0, "cs2_pct": 82.0, "cs1_score": 99.58, "cs2_score": 99.58}];
 
-const RAW = {"names": ["ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "วันวิสา ขวัญแก้ว (จอย)", "รัตนา คงซัง (เอ๋)", "นางสาวสุวดี ประเจียด (ครีม)", "นางสาวกชพร พันชวะนัส (สอง)"], "short_names": ["ผึ้ง", "จอย", "เอ๋", "ครีม", "สอง"], "periods": {"May": {"persons": [{"month": "May", "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 14, "target_mb": 30726706.28, "actual_unit": 8, "actual_mb": 18165000, "pct": 0.591179537255628, "diff_unit": -6, "diff_mb": -12561706.280000001, "walkin": 5, "ratio_walk_book": 0.625, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 31, "regis": 31, "chat": 0, "ratio_lead_walk": 6.2, "kavalon": {"target_unit": 13, "target_mb": 28236706.28, "actual_unit": 8, "actual_mb": 18165000, "pct": 0.6433115753612606, "ratio_walk_book": 0.625, "walkin": 5, "total_lead": 31, "regis": 31, "chat": 0, "ratio_lead_walk": 6.2, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 8, "net_mb": 18165000}, "atmoz": {"target_unit": 1, "target_mb": 2490000, "actual_unit": 0, "actual_mb": 0, "pct": 0, "ratio_walk_book": null, "walkin": 0, "total_lead": 3, "regis": 3, "chat": 0, "ratio_lead_walk": null, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 0, "net_mb": 0}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 34, "regis_combined": 34, "chat_combined": 0, "ratio_lead_walk_combined": 6.8, "short": "ผึ้ง"}, {"month": "May", "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 9, "target_mb": 20820271.65, "actual_unit": 8, "actual_mb": 19477420, "pct": 0.9355026835108562, "diff_unit": -1, "diff_mb": -1342851.6499999985, "walkin": 5, "ratio_walk_book": 0.625, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 15, "regis": 15, "chat": 0, "ratio_lead_walk": 7.5, "kavalon": {"target_unit": 5, "target_mb": 10860271.65, "actual_unit": 6, "actual_mb": 14545000, "pct": 1.3392850997424175, "ratio_walk_book": 0.3333333333333333, "walkin": 2, "total_lead": 15, "regis": 15, "chat": 0, "ratio_lead_walk": 7.5, "b2b_unit": 1, "b2b_mb": 2740000, "net_unit": 5, "net_mb": 11805000}, "atmoz": {"target_unit": 4, "target_mb": 9960000, "actual_unit": 2, "actual_mb": 4932420, "pct": 0.49522289156626503, "ratio_walk_book": 1.5, "walkin": 3, "total_lead": 41, "regis": 38, "chat": 3, "ratio_lead_walk": 13.666666666666666, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 4932420}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 56, "regis_combined": 53, "chat_combined": 3, "ratio_lead_walk_combined": 11.2, "short": "จอย"}, {"month": "May", "name": "รัตนา คงซัง (เอ๋)", "target_unit": 8, "target_mb": 17694380.3, "actual_unit": 3, "actual_mb": 7830000, "pct": 0.4425133781034422, "diff_unit": -5, "diff_mb": -9864380.3, "walkin": 6, "ratio_walk_book": 2, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 19, "regis": 17, "chat": 2, "ratio_lead_walk": 4.75, "kavalon": {"target_unit": 7, "target_mb": 15204380.3, "actual_unit": 2, "actual_mb": 5840000, "pct": 0.3840998373343766, "ratio_walk_book": 2, "walkin": 4, "total_lead": 19, "regis": 17, "chat": 2, "ratio_lead_walk": 4.75, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 5840000}, "atmoz": {"target_unit": 1, "target_mb": 2490000, "actual_unit": 1, "actual_mb": 1990000, "pct": 0.7991967871485943, "ratio_walk_book": 2, "walkin": 2, "total_lead": 7, "regis": 5, "chat": 2, "ratio_lead_walk": 3.5, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 1, "net_mb": 1990000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 26, "regis_combined": 22, "chat_combined": 4, "ratio_lead_walk_combined": 4.333333333333333, "short": "เอ๋"}, {"month": "May", "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 8, "target_mb": 17694380.3, "actual_unit": 7, "actual_mb": 17755000, "pct": 1.0034259295308579, "diff_unit": -1, "diff_mb": 60619.699999999255, "walkin": 10, "ratio_walk_book": 1.4285714285714286, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 21, "regis": 19, "chat": 2, "ratio_lead_walk": 3, "kavalon": {"target_unit": 7, "target_mb": 15204380.3, "actual_unit": 5, "actual_mb": 13660000, "pct": 0.8984253044499287, "ratio_walk_book": 1.4, "walkin": 7, "total_lead": 21, "regis": 19, "chat": 2, "ratio_lead_walk": 3, "b2b_unit": 1, "b2b_mb": 3810000, "net_unit": 4, "net_mb": 9850000}, "atmoz": {"target_unit": 1, "target_mb": 2490000, "actual_unit": 2, "actual_mb": 4095000, "pct": 1.644578313253012, "ratio_walk_book": 1.5, "walkin": 3, "total_lead": 7, "regis": 7, "chat": 0, "ratio_lead_walk": 2.3333333333333335, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 4095000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 28, "regis_combined": 26, "chat_combined": 2, "ratio_lead_walk_combined": 2.8, "short": "ครีม"}, {"month": "May", "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 10, "target_mb": 23679925.32, "actual_unit": 6, "actual_mb": 11910000, "pct": 0.5029576672668324, "diff_unit": -4, "diff_mb": -11769925.32, "walkin": 9, "ratio_walk_book": 1.5, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 4, "regis": 4, "chat": 0, "ratio_lead_walk": null, "kavalon": {"target_unit": 4, "target_mb": 8688217.32, "actual_unit": 0, "actual_mb": 0, "pct": 0, "ratio_walk_book": null, "walkin": 0, "total_lead": 4, "regis": 4, "chat": 0, "ratio_lead_walk": null, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 0, "net_mb": 0}, "atmoz": {"target_unit": 6, "target_mb": 14991708, "actual_unit": 6, "actual_mb": 11910000, "pct": 0.7944391659709488, "ratio_walk_book": 1.5, "walkin": 9, "total_lead": 64, "regis": 64, "chat": 0, "ratio_lead_walk": 7.111111111111111, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 6, "net_mb": 11910000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 68, "regis_combined": 68, "chat_combined": 0, "ratio_lead_walk_combined": 7.555555555555555, "short": "สอง"}], "total": {"month": "May", "name": "TOTAL", "target_unit": 49, "target_mb": 110615663.85, "actual_unit": 32, "actual_mb": 75137420, "pct": 0.6792656427202738, "diff_unit": -17, "diff_mb": -35478243.85, "walkin": 35, "ratio_walk_book": 1.09375, "cs1_pct": null, "cs2_pct": null, "cs1_score": 0, "cs2_score": 0, "total_lead": 90, "regis": 86, "chat": 4, "ratio_lead_walk": 5, "kavalon": {"target_unit": 36, "target_mb": 78193955.85, "actual_unit": 21, "actual_mb": 52210000, "pct": 0.6676986658681753, "ratio_walk_book": 0.8571428571428571, "walkin": 18, "total_lead": 90, "regis": 86, "chat": 4, "ratio_lead_walk": 5, "b2b_unit": 2, "b2b_mb": 6550000, "net_unit": 19, "net_mb": 45660000}, "atmoz": {"target_unit": 13, "target_mb": 32421708, "actual_unit": 11, "actual_mb": 22927420, "pct": 0.7071626207971523, "ratio_walk_book": 1.5454545454545454, "walkin": 17, "total_lead": 122, "regis": 117, "chat": 5, "ratio_lead_walk": 7.176470588235294, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 11, "net_mb": 22927420}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 212, "regis_combined": 203, "chat_combined": 9, "ratio_lead_walk_combined": 6.057142857142857, "short": "TOTAL"}}, "June": {"persons": [{"month": "June", "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 11, "target_mb": 25800271.65, "actual_unit": 8.5, "actual_mb": 18155000, "pct": 0.7036747615019783, "diff_unit": -2.5, "diff_mb": -7645271.6499999985, "walkin": 11, "ratio_walk_book": 1.2941176470588236, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 27, "regis": 24, "chat": 3, "ratio_lead_walk": 5.4, "kavalon": {"target_unit": 5, "target_mb": 10860271.65, "actual_unit": 5.5, "actual_mb": 12035000, "pct": 1.108167492292884, "ratio_walk_book": 0.9090909090909091, "walkin": 5, "total_lead": 27, "regis": 24, "chat": 3, "ratio_lead_walk": 5.4, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 5.5, "net_mb": 12035000}, "atmoz": {"target_unit": 6, "target_mb": 14940000, "actual_unit": 3, "actual_mb": 6120000, "pct": 0.40963855421686746, "ratio_walk_book": 2, "walkin": 6, "total_lead": 18, "regis": 18, "chat": 0, "ratio_lead_walk": 3, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 3, "net_mb": 6120000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 45, "regis_combined": 42, "chat_combined": 3, "ratio_lead_walk_combined": 4.090909090909091, "short": "ผึ้ง"}, {"month": "June", "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 14, "target_mb": 31680543.29, "actual_unit": 11.5, "actual_mb": 25827100, "pct": 0.8152353879661007, "diff_unit": -2.5, "diff_mb": -5853443.289999999, "walkin": 10, "ratio_walk_book": 0.8695652173913043, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 43, "regis": 43, "chat": 0, "ratio_lead_walk": 10.75, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 5.5, "actual_mb": 12295000, "pct": 0.5660539810558303, "ratio_walk_book": 0.7272727272727273, "walkin": 4, "total_lead": 43, "regis": 43, "chat": 0, "ratio_lead_walk": 10.75, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 5.5, "net_mb": 12295000}, "atmoz": {"target_unit": 4, "target_mb": 9960000, "actual_unit": 6, "actual_mb": 13532100, "pct": 1.358644578313253, "ratio_walk_book": 1, "walkin": 6, "total_lead": 16, "regis": 14, "chat": 2, "ratio_lead_walk": 2.6666666666666665, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 6, "net_mb": 13532100}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 59, "regis_combined": 57, "chat_combined": 2, "ratio_lead_walk_combined": 5.9, "short": "จอย"}, {"month": "June", "name": "รัตนา คงซัง (เอ๋)", "target_unit": 14, "target_mb": 31680543.29, "actual_unit": 7.5, "actual_mb": 16610000, "pct": 0.5242965642335738, "diff_unit": -6.5, "diff_mb": -15070543.29, "walkin": 11, "ratio_walk_book": 1.4666666666666666, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 34, "regis": 30, "chat": 4, "ratio_lead_walk": 4.857142857142857, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 3.5, "actual_mb": 8210000, "pct": 0.3779831788912864, "ratio_walk_book": 2, "walkin": 7, "total_lead": 34, "regis": 30, "chat": 4, "ratio_lead_walk": 4.857142857142857, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 3.5, "net_mb": 8210000}, "atmoz": {"target_unit": 4, "target_mb": 9960000, "actual_unit": 4, "actual_mb": 8400000, "pct": 0.8433734939759037, "ratio_walk_book": 1, "walkin": 4, "total_lead": 14, "regis": 9, "chat": 5, "ratio_lead_walk": 3.5, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 3, "net_mb": 3838000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 48, "regis_combined": 39, "chat_combined": 9, "ratio_lead_walk_combined": 4.363636363636363, "short": "เอ๋"}, {"month": "June", "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 14, "target_mb": 31680543.29, "actual_unit": 7, "actual_mb": 15685100, "pct": 0.4951019891426868, "diff_unit": -7, "diff_mb": -15995443.29, "walkin": 10, "ratio_walk_book": 1.4285714285714286, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 38, "regis": 33, "chat": 5, "ratio_lead_walk": 5.428571428571429, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 5, "actual_mb": 11725000, "pct": 0.5398115435444986, "ratio_walk_book": 1.4, "walkin": 7, "total_lead": 38, "regis": 33, "chat": 5, "ratio_lead_walk": 5.428571428571429, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 5, "net_mb": 11725000}, "atmoz": {"target_unit": 4, "target_mb": 9960000, "actual_unit": 2, "actual_mb": 3960100, "pct": 0.3976004016064257, "ratio_walk_book": 1.5, "walkin": 3, "total_lead": 2, "regis": 2, "chat": 0, "ratio_lead_walk": 0.6666666666666666, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 3960100}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 40, "regis_combined": 35, "chat_combined": 5, "ratio_lead_walk_combined": 4.0, "short": "ครีม"}, {"month": "June", "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 14, "target_mb": 31680543.29, "actual_unit": 7.5, "actual_mb": 16960000, "pct": 0.5353443545696214, "diff_unit": -6.5, "diff_mb": -14720543.29, "walkin": 10, "ratio_walk_book": 1.3333333333333333, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 49, "regis": 46, "chat": 3, "ratio_lead_walk": 7, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 6.5, "actual_mb": 15120000, "pct": 0.6961151845111145, "ratio_walk_book": 1.0769230769230769, "walkin": 7, "total_lead": 49, "regis": 46, "chat": 3, "ratio_lead_walk": 7, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 6.5, "net_mb": 15120000}, "atmoz": {"target_unit": 4, "target_mb": 9960000, "actual_unit": 1, "actual_mb": 1840000, "pct": 0.18473895582329317, "ratio_walk_book": 3, "walkin": 3, "total_lead": 10, "regis": 10, "chat": 0, "ratio_lead_walk": 3.3333333333333335, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 1, "net_mb": 1840000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 59, "regis_combined": 56, "chat_combined": 3, "ratio_lead_walk_combined": 5.9, "short": "สอง"}], "total": {"month": "June", "name": "TOTAL", "target_unit": 67, "target_mb": 152522444.80999997, "actual_unit": 42, "actual_mb": 93237200, "pct": 0.6113015046155816, "diff_unit": -25, "diff_mb": -59285244.809999995, "walkin": 52, "ratio_walk_book": 1.2380952380952381, "cs1_pct": null, "cs2_pct": null, "cs1_score": 0, "cs2_score": 0, "total_lead": 191, "regis": 176, "chat": 15, "ratio_lead_walk": 6.366666666666666, "kavalon": {"target_unit": 45, "target_mb": 97742444.81, "actual_unit": 26, "actual_mb": 59385000, "pct": 0.6075661409476463, "ratio_walk_book": 1.1538461538461537, "walkin": 30, "total_lead": 191, "regis": 176, "chat": 15, "ratio_lead_walk": 6.366666666666666, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 26, "net_mb": 59385000}, "atmoz": {"target_unit": 22, "target_mb": 54780000, "actual_unit": 16, "actual_mb": 33852200, "pct": 0.6179664110989412, "ratio_walk_book": 1.375, "walkin": 22, "total_lead": 60, "regis": 53, "chat": 7, "ratio_lead_walk": 2.727272727272727, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 15, "net_mb": 29290200}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 251, "regis_combined": 229, "chat_combined": 22, "ratio_lead_walk_combined": 4.826923076923077, "short": "TOTAL"}}, "July": {"persons": [{"month": "July", "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 16, "target_mb": 36660543.29, "actual_unit": 7.5, "actual_mb": 15594000, "pct": 0.425361945038431, "diff_unit": -8.5, "diff_mb": -21066543.29, "walkin": 5, "ratio_walk_book": 0.6666666666666666, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 35, "regis": 34, "chat": 1, "ratio_lead_walk": 7, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 6.5, "actual_mb": 14375000, "pct": 0.6618158582901634, "ratio_walk_book": 0.7692307692307693, "walkin": 5, "total_lead": 35, "regis": 34, "chat": 1, "ratio_lead_walk": 7, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 6.5, "net_mb": 14375000}, "atmoz": {"target_unit": 6, "target_mb": 14940000, "actual_unit": 1, "actual_mb": 1219000, "pct": 0.08159303882195448, "ratio_walk_book": 0, "walkin": 0, "total_lead": 19, "regis": 16, "chat": 3, "ratio_lead_walk": null, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 1, "net_mb": 1219000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 54, "regis_combined": 50, "chat_combined": 4, "ratio_lead_walk_combined": 10.8, "short": "ผึ้ง"}, {"month": "July", "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 16, "target_mb": 36660543.29, "actual_unit": 7.5, "actual_mb": 14990000, "pct": 0.4088864663412903, "diff_unit": -8.5, "diff_mb": -21670543.29, "walkin": 9, "ratio_walk_book": 1.2, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 51, "regis": 47, "chat": 4, "ratio_lead_walk": 10.2, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 3.5, "actual_mb": 7580000, "pct": 0.3489783795366566, "ratio_walk_book": 1.4285714285714286, "walkin": 5, "total_lead": 51, "regis": 47, "chat": 4, "ratio_lead_walk": 10.2, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 3.5, "net_mb": 7580000}, "atmoz": {"target_unit": 6, "target_mb": 14940000, "actual_unit": 4, "actual_mb": 7410000, "pct": 0.4959839357429719, "ratio_walk_book": 1, "walkin": 4, "total_lead": 26, "regis": 18, "chat": 8, "ratio_lead_walk": 6.5, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 4, "net_mb": 7410000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 77, "regis_combined": 65, "chat_combined": 12, "ratio_lead_walk_combined": 8.555555555555555, "short": "จอย"}, {"month": "July", "name": "รัตนา คงซัง (เอ๋)", "target_unit": 16, "target_mb": 36660543.29, "actual_unit": 3, "actual_mb": 9767000, "pct": 0.26641721926320094, "diff_unit": -13, "diff_mb": -26893543.29, "walkin": 7, "ratio_walk_book": 2.3333333333333335, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 30, "regis": 28, "chat": 2, "ratio_lead_walk": 10, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 1, "actual_mb": 2675000, "pct": 0.12315529884703912, "ratio_walk_book": 3, "walkin": 3, "total_lead": 30, "regis": 28, "chat": 2, "ratio_lead_walk": 10, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 1, "net_mb": 2675000}, "atmoz": {"target_unit": 6, "target_mb": 14940000, "actual_unit": 2, "actual_mb": 7092000, "pct": 0.4746987951807229, "ratio_walk_book": 2, "walkin": 4, "total_lead": 12, "regis": 11, "chat": 1, "ratio_lead_walk": 3, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 7092000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 42, "regis_combined": 39, "chat_combined": 3, "ratio_lead_walk_combined": 6.0, "short": "เอ๋"}, {"month": "July", "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 17, "target_mb": 39150543.29, "actual_unit": 6, "actual_mb": 13400000, "pct": 0.3422685580821221, "diff_unit": -11, "diff_mb": -25750543.29, "walkin": 9, "ratio_walk_book": 1.5, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 35, "regis": 34, "chat": 1, "ratio_lead_walk": 5.833333333333333, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 5, "actual_mb": 11610000, "pct": 0.5345170166781772, "ratio_walk_book": 1.2, "walkin": 6, "total_lead": 35, "regis": 34, "chat": 1, "ratio_lead_walk": 5.833333333333333, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 5, "net_mb": 11610000}, "atmoz": {"target_unit": 7, "target_mb": 17430000, "actual_unit": 1, "actual_mb": 1790000, "pct": 0.10269650028686174, "ratio_walk_book": 3, "walkin": 3, "total_lead": 11, "regis": 8, "chat": 3, "ratio_lead_walk": 3.6666666666666665, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 1, "net_mb": 1790000}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 46, "regis_combined": 42, "chat_combined": 4, "ratio_lead_walk_combined": 5.111111111111111, "short": "ครีม"}, {"month": "July", "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 16, "target_mb": 36660543.29, "actual_unit": 6, "actual_mb": 12735100, "pct": 0.3473789217813853, "diff_unit": -10, "diff_mb": -23925443.29, "walkin": 9, "ratio_walk_book": 1.5, "cs1_pct": null, "cs2_pct": null, "cs1_score": null, "cs2_score": null, "total_lead": 36, "regis": 22, "chat": 14, "ratio_lead_walk": 7.2, "kavalon": {"target_unit": 10, "target_mb": 21720543.29, "actual_unit": 4, "actual_mb": 9645000, "pct": 0.44404966631016535, "ratio_walk_book": 1.25, "walkin": 5, "total_lead": 36, "regis": 22, "chat": 14, "ratio_lead_walk": 7.2, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 4, "net_mb": 9645000}, "atmoz": {"target_unit": 6, "target_mb": 14940000, "actual_unit": 2, "actual_mb": 3090100, "pct": 0.20683400267737617, "ratio_walk_book": 2, "walkin": 4, "total_lead": 25, "regis": 24, "chat": 1, "ratio_lead_walk": 6.25, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 2, "net_mb": 3090100}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 61, "regis_combined": 46, "chat_combined": 15, "ratio_lead_walk_combined": 6.777777777777778, "short": "สอง"}], "total": {"month": "July", "name": "TOTAL", "target_unit": 81, "target_mb": 185792716.45, "actual_unit": 30, "actual_mb": 66486100, "pct": 0.35785094954404495, "diff_unit": -51, "diff_mb": -119306616.44999999, "walkin": 39, "ratio_walk_book": 1.3, "cs1_pct": null, "cs2_pct": null, "cs1_score": 0, "cs2_score": 0, "total_lead": 187, "regis": 165, "chat": 22, "ratio_lead_walk": 7.791666666666667, "kavalon": {"target_unit": 50, "target_mb": 108602716.44999999, "actual_unit": 20, "actual_mb": 45885000, "pct": 0.4225032439324404, "ratio_walk_book": 1.2, "walkin": 24, "total_lead": 187, "regis": 165, "chat": 22, "ratio_lead_walk": 7.791666666666667, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 20, "net_mb": 45885000}, "atmoz": {"target_unit": 31, "target_mb": 77190000, "actual_unit": 10, "actual_mb": 20601100, "pct": 0.26688819795310276, "ratio_walk_book": 1.5, "walkin": 15, "total_lead": 93, "regis": 77, "chat": 16, "ratio_lead_walk": 6.2, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 10, "net_mb": 20601100}, "modiz_avg": {"unit": null, "mb": null}, "kave_wdl": {"unit": null, "mb": null}, "maroon32": {"unit": null, "mb": null}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 280, "regis_combined": 242, "chat_combined": 38, "ratio_lead_walk_combined": 7.17948717948718, "short": "TOTAL"}}, "Cumulative": {"persons": [{"month": "Cumulative", "name": "ฐณัฎนันธ์ ทรัพย์มิตร (ผึ้ง)", "target_unit": 41, "target_mb": 93187521.22, "actual_unit": 24, "actual_mb": 51914000, "pct": 0.557091757784176, "diff_unit": -17, "diff_mb": -41273521.22, "walkin": 21, "ratio_walk_book": 0.875, "cs1_pct": 0.6176, "cs2_pct": 0.6667, "cs1_score": 0.9922, "cs2_score": 1, "total_lead": 93, "regis": 89, "chat": 4, "ratio_lead_walk": 6.2, "kavalon": {"target_unit": 28, "target_mb": 60817521.22, "actual_unit": 20, "actual_mb": 44575000, "pct": 0.7329302330286588, "ratio_walk_book": 0.75, "walkin": 15, "total_lead": 93, "regis": 89, "chat": 4, "ratio_lead_walk": 6.2, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 20, "net_mb": 44575000}, "atmoz": {"target_unit": 13, "target_mb": 32370000, "actual_unit": 4, "actual_mb": 7339000, "pct": 0.22672227371022552, "ratio_walk_book": 1.5, "walkin": 6, "total_lead": 40, "regis": 37, "chat": 3, "ratio_lead_walk": 6.666666666666667, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 4, "net_mb": 7339000}, "modiz_avg": {"unit": 0, "mb": 0}, "kave_wdl": {"unit": 0, "mb": 0}, "maroon32": {"unit": 0, "mb": 0}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 133, "regis_combined": 126, "chat_combined": 7, "ratio_lead_walk_combined": 6.333333333333333, "short": "ผึ้ง"}, {"month": "Cumulative", "name": "วันวิสา ขวัญแก้ว (จอย)", "target_unit": 39, "target_mb": 89161358.22999999, "actual_unit": 27, "actual_mb": 60294520, "pct": 0.6762404835115308, "diff_unit": -12, "diff_mb": -28866838.22999999, "walkin": 24, "ratio_walk_book": 0.8888888888888888, "cs1_pct": 0.8276, "cs2_pct": 1.4, "cs1_score": 0.9971, "cs2_score": 0.9982, "total_lead": 109, "regis": 105, "chat": 4, "ratio_lead_walk": 9.909090909090908, "kavalon": {"target_unit": 25, "target_mb": 54301358.23, "actual_unit": 15, "actual_mb": 34420000, "pct": 0.633869964250432, "ratio_walk_book": 0.7333333333333333, "walkin": 11, "total_lead": 109, "regis": 105, "chat": 4, "ratio_lead_walk": 9.909090909090908, "b2b_unit": 1, "b2b_mb": 2740000, "net_unit": 14, "net_mb": 31680000}, "atmoz": {"target_unit": 14, "target_mb": 34860000, "actual_unit": 12, "actual_mb": 25874520, "pct": 0.7422409638554217, "ratio_walk_book": 1.0833333333333333, "walkin": 13, "total_lead": 83, "regis": 70, "chat": 13, "ratio_lead_walk": 6.384615384615385, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 12, "net_mb": 25874520}, "modiz_avg": {"unit": 0, "mb": 0}, "kave_wdl": {"unit": 0, "mb": 0}, "maroon32": {"unit": 0, "mb": 0}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 192, "regis_combined": 175, "chat_combined": 17, "ratio_lead_walk_combined": 8.0, "short": "จอย"}, {"month": "Cumulative", "name": "รัตนา คงซัง (เอ๋)", "target_unit": 38, "target_mb": 86035466.88, "actual_unit": 20.5, "actual_mb": 50267000, "pct": 0.5842590483074973, "diff_unit": -17.5, "diff_mb": -35768466.879999995, "walkin": 24, "ratio_walk_book": 1.170731707317073, "cs1_pct": 0.96, "cs2_pct": 1.1538, "cs1_score": 0.9773, "cs2_score": 0.9985, "total_lead": 83, "regis": 75, "chat": 8, "ratio_lead_walk": 5.928571428571429, "kavalon": {"target_unit": 27, "target_mb": 58645466.88, "actual_unit": 6.5, "actual_mb": 16725000, "pct": 0.28518828291063986, "ratio_walk_book": 2.1538461538461537, "walkin": 14, "total_lead": 83, "regis": 75, "chat": 8, "ratio_lead_walk": 5.928571428571429, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 6.5, "net_mb": 16725000}, "atmoz": {"target_unit": 11, "target_mb": 27390000, "actual_unit": 7, "actual_mb": 17482000, "pct": 0.6382621394669588, "ratio_walk_book": 1.4285714285714286, "walkin": 10, "total_lead": 33, "regis": 25, "chat": 8, "ratio_lead_walk": 3.3, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 6, "net_mb": 12920000}, "modiz_avg": {"unit": 0, "mb": 0}, "kave_wdl": {"unit": 0, "mb": 0}, "maroon32": {"unit": 1, "mb": 2460000}, "kave_cnv": {"unit": 6, "mb": 13600000}, "atmoz_kanaal": {"unit": 7, "mb": 16158000}, "total_lead_combined": 116, "regis_combined": 100, "chat_combined": 16, "ratio_lead_walk_combined": 4.833333333333333, "short": "เอ๋"}, {"month": "Cumulative", "name": "นางสาวสุวดี ประเจียด (ครีม)", "target_unit": 39, "target_mb": 88525466.88, "actual_unit": 23, "actual_mb": 52920100, "pct": 0.5977952092784263, "diff_unit": -16, "diff_mb": -35605366.879999995, "walkin": 29, "ratio_walk_book": 1.2608695652173914, "cs1_pct": 0.9063, "cs2_pct": 1.1538, "cs1_score": 0.9823, "cs2_score": 0.9711, "total_lead": 94, "regis": 86, "chat": 8, "ratio_lead_walk": 4.7, "kavalon": {"target_unit": 27, "target_mb": 58645466.88, "actual_unit": 15, "actual_mb": 36995000, "pct": 0.630824545666913, "ratio_walk_book": 1.3333333333333333, "walkin": 20, "total_lead": 94, "regis": 86, "chat": 8, "ratio_lead_walk": 4.7, "b2b_unit": 1, "b2b_mb": 3810000, "net_unit": 14, "net_mb": 33185000}, "atmoz": {"target_unit": 12, "target_mb": 29880000, "actual_unit": 5, "actual_mb": 9845100, "pct": 0.3294879518072289, "ratio_walk_book": 1.8, "walkin": 9, "total_lead": 20, "regis": 17, "chat": 3, "ratio_lead_walk": 2.2222222222222223, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 5, "net_mb": 9845100}, "modiz_avg": {"unit": 1, "mb": 2050000}, "kave_wdl": {"unit": 2, "mb": 4030000}, "maroon32": {"unit": 0, "mb": 0}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 114, "regis_combined": 103, "chat_combined": 11, "ratio_lead_walk_combined": 3.9310344827586206, "short": "ครีม"}, {"month": "Cumulative", "name": "นางสาวกชพร พันชวะนัส (สอง)", "target_unit": 40, "target_mb": 92021011.9, "actual_unit": 19.5, "actual_mb": 41605100, "pct": 0.45212608665086845, "diff_unit": -20.5, "diff_mb": -50415911.900000006, "walkin": 28, "ratio_walk_book": 1.435897435897436, "cs1_pct": 0.9032, "cs2_pct": 1.0625, "cs1_score": 0.9774, "cs2_score": 0.968, "total_lead": 89, "regis": 72, "chat": 17, "ratio_lead_walk": 7.416666666666667, "kavalon": {"target_unit": 24, "target_mb": 52129303.9, "actual_unit": 10.5, "actual_mb": 24765000, "pct": 0.47506868780574685, "ratio_walk_book": 1.1428571428571428, "walkin": 12, "total_lead": 89, "regis": 72, "chat": 17, "ratio_lead_walk": 7.416666666666667, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 10.5, "net_mb": 24765000}, "atmoz": {"target_unit": 16, "target_mb": 39891708, "actual_unit": 9, "actual_mb": 16840100, "pct": 0.4221453741714945, "ratio_walk_book": 1.7777777777777777, "walkin": 16, "total_lead": 99, "regis": 98, "chat": 1, "ratio_lead_walk": 6.1875, "b2b_unit": 0, "b2b_mb": 0, "net_unit": 9, "net_mb": 16840100}, "modiz_avg": {"unit": 0, "mb": 0}, "kave_wdl": {"unit": 0, "mb": 0}, "maroon32": {"unit": 0, "mb": 0}, "kave_cnv": {"unit": null, "mb": null}, "atmoz_kanaal": {"unit": null, "mb": null}, "total_lead_combined": 188, "regis_combined": 170, "chat_combined": 18, "ratio_lead_walk_combined": 6.714285714285714, "short": "สอง"}], "total": {"month": "Cumulative", "name": "TOTAL", "target_unit": 197, "target_mb": 448930825.11, "actual_unit": 114, "actual_mb": 257000720, "pct": 0.5724728747174533, "diff_unit": -83, "diff_mb": -191930105.10999998, "walkin": 126, "ratio_walk_book": 1.105263157894737, "cs1_pct": 0.8429399999999999, "cs2_pct": 1.0873599999999999, "cs1_score": 0.98526, "cs2_score": 0.98716, "total_lead": 468, "regis": 427, "chat": 41, "ratio_lead_walk": 6.5, "kavalon": {"target_unit": 131, "target_mb": 284539117.10999995, "actual_unit": 67, "actual_mb": 157480000, "pct": 0.5534564161142027, "ratio_walk_book": 1.0746268656716418, "walkin": 72, "total_lead": 468, "regis": 427, "chat": 41, "ratio_lead_walk": 6.5, "b2b_unit": 2, "b2b_mb": 6550000, "net_unit": 65, "net_mb": 150930000}, "atmoz": {"target_unit": 66, "target_mb": 164391708, "actual_unit": 37, "actual_mb": 77380720, "pct": 0.4707093863882721, "ratio_walk_book": 1.4594594594594594, "walkin": 54, "total_lead": 275, "regis": 247, "chat": 28, "ratio_lead_walk": 5.092592592592593, "b2b_unit": 1, "b2b_mb": 4562000, "net_unit": 36, "net_mb": 72818720}, "modiz_avg": {"unit": 1, "mb": 2050000}, "kave_wdl": {"unit": 2, "mb": 4030000}, "maroon32": {"unit": 1, "mb": 2460000}, "kave_cnv": {"unit": 6, "mb": 13600000}, "atmoz_kanaal": {"unit": 7, "mb": 16158000}, "total_lead_combined": 743, "regis_combined": 674, "chat_combined": 69, "ratio_lead_walk_combined": 5.896825396825397, "short": "TOTAL"}}}};
-const NAMES = RAW.names;
-const SHORT_NAMES = RAW.short_names;
+const fmtNum = n => Math.round(n).toLocaleString('en-US');
+const fmtMB = n => (n/1e6).toLocaleString('en-US',{maximumFractionDigits:1,minimumFractionDigits:1});
+const fmtPct = n => n.toFixed(1)+'%';
 
-const PROJECT_LABELS = {
-  ALL: 'ภาพรวมทั้งหมด', KAVALON: 'KAVALON', ATMOZ: 'ATMOZ DESOL',
-  MODIZ_AVG: 'MODIZ AVG', KAVE_WDL: 'KAVE WDL', MAROON32: 'MAROON 32',
-  KAVE_CNV: 'KAVE CNV', ATMOZ_KANAAL: 'ATMOZ KANAAL'
-};
-const SMALL_PROJECT_KEYS = {
-  MODIZ_AVG: 'modiz_avg', KAVE_WDL: 'kave_wdl', MAROON32: 'maroon32',
-  KAVE_CNV: 'kave_cnv', ATMOZ_KANAAL: 'atmoz_kanaal'
-};
-const MAIN_PROJECT_KEYS = { KAVALON: 'kavalon', ATMOZ: 'atmoz' };
+let selected = new Set(RAW_DATA.map(d=>d.no));
+let sortKey = 'pct_net_target';
+let sortDir = 'desc';
 
-const COLORS = ['#2e75b6','#c05c00','#1e8e3e','#9c27b0','#c62828','#555555'];
 
-// Populate person filter dropdown
-(function initPersonFilter(){
-  const sel = document.getElementById('personFilter');
-  NAMES.forEach((n, i) => {
-    const opt = document.createElement('option');
-    opt.value = SHORT_NAMES[i];
-    opt.textContent = n;
-    sel.appendChild(opt);
-  });
-})();
+// ---------- Filter panel ----------
+const filterBtn = document.getElementById('filterBtn');
+const filterPanel = document.getElementById('filterPanel');
+const filterList = document.getElementById('filterList');
+const searchInput = document.getElementById('searchInput');
 
-function fmtNum(v){
-  if (v === null || v === undefined) return '-';
-  return Number(v).toLocaleString(undefined, {maximumFractionDigits:1});
-}
-function fmtMB(v){
-  if (v === null || v === undefined) return '-';
-  return '฿' + (v/1e6).toFixed(1) + 'M';
-}
-function fmtPct(v){
-  if (v === null || v === undefined) return '-';
-  return (v*100).toFixed(1) + '%';
-}
-function fmtRatio(v){
-  if (v === null || v === undefined) return '-';
-  return v.toFixed(2);
-}
-function pctClass(v){ if (v>=0.8) return 'pct-good'; if (v>=0.5) return 'pct-mid'; return 'pct-bad'; }
-function pctColor(v){ if (v>=0.8) return '#1e8e3e'; if (v>=0.5) return '#e08e0b'; return '#c62828'; }
-
-let charts = {};
-let sortState = {key:'pct', dir:'desc'};
-let projSortState = {key:'pct', dir:'desc'};
-let smallSortState = {key:'unit', dir:'desc'};
-
-function getPersonsForMonth(month){
-  const period = month === 'ALL' ? RAW.periods['Cumulative'] : RAW.periods[month];
-  return period.persons;
-}
-function getTotalForMonth(month){
-  const period = month === 'ALL' ? RAW.periods['Cumulative'] : RAW.periods[month];
-  return period.total;
-}
-function applyPersonFilter(rows, person){
-  if (person === 'ALL') return rows;
-  return rows.filter(r => r.short === person);
-}
-function getCSSource(){
-  return RAW.periods['Cumulative'].persons; // CS only exists cumulative
-}
-
-// =========================================================
-// OVERVIEW (project = ALL)
-// =========================================================
-function renderOverviewKPIs(month, person){
-  const persons = applyPersonFilter(getPersonsForMonth(month), person);
-  const total = person === 'ALL' ? getTotalForMonth(month) : persons[0];
-  if (!total) return;
-  const kpis = [
-    {label:'เป้าขายรวม (Unit)', value: fmtNum(total.target_unit)},
-    {label:'ยอดขายจริง (Unit)', value: fmtNum(total.actual_unit)},
-    {label:'% Achievement', value: fmtPct(total.pct)},
-    {label:'ยอดขายรวม (MB)', value: fmtMB(total.actual_mb)},
-    {label:'Total Lead (KAVALON+ATMOZ)', value: fmtNum(total.total_lead_combined)},
-    {label:'Register (KAVALON+ATMOZ)', value: fmtNum(total.regis_combined)},
-    {label:'Chat (KAVALON+ATMOZ)', value: fmtNum(total.chat_combined)},
-    {label:'Ratio Lead:Walk', value: fmtRatio(total.ratio_lead_walk_combined)},
-    {label:'Ratio Walk:Book', value: fmtRatio(total.ratio_walk_book)},
-  ];
-  document.getElementById('kpiRow').innerHTML = kpis.map(k => `
-    <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>
-  `).join('');
-}
-
-function renderTargetActualChart(person){
-  const labels = ['May','June','July'];
-  const getVal = (m, field) => {
-    if (person === 'ALL') return RAW.periods[m].total[field];
-    const p = RAW.periods[m].persons.find(x => x.short === person);
-    return p ? p[field] : 0;
-  };
-  const target = labels.map(m => getVal(m,'target_unit'));
-  const actual = labels.map(m => getVal(m,'actual_unit'));
-  document.getElementById('chartTAnote').textContent = person === 'ALL'
-    ? 'ตัวเลขรวมทั้งทีม แยกตามเดือน' : `ตัวเลขของ ${person} แยกตามเดือน`;
-  const ctx = document.getElementById('chartTargetActual').getContext('2d');
-  if (charts.ta) charts.ta.destroy();
-  charts.ta = new Chart(ctx, {
-    type:'bar',
-    data:{labels, datasets:[
-      {label:'Target', data:target, backgroundColor:'#c0d4e8'},
-      {label:'Actual', data:actual, backgroundColor:'#2e75b6'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:11}, formatter:v=>fmtNum(v)}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Unit'}}}
-    }
+function renderFilterList(query=''){
+  filterList.innerHTML = '';
+  const q = query.trim().toLowerCase();
+  RAW_DATA.filter(d=>d.name.toLowerCase().includes(q)).forEach(d=>{
+    const item = document.createElement('label');
+    item.className='filter-item';
+    item.innerHTML = `<input type="checkbox" data-no="${d.no}" ${selected.has(d.no)?'checked':''}>
+      <span class="rank">#${d.no}</span><span>${d.name}</span>`;
+    filterList.appendChild(item);
   });
 }
+renderFilterList();
 
-function renderTrendChart(person){
-  const labels = ['May','June','July'];
-  const namesToShow = person === 'ALL' ? SHORT_NAMES : [person];
-  const datasets = namesToShow.map((name,i) => ({
-    label:name,
-    data:labels.map(m => {
-      const rec = RAW.periods[m].persons.find(r=>r.short===name);
-      return rec ? +(rec.pct*100).toFixed(1) : null;
-    }),
-    borderColor: COLORS[i%COLORS.length], backgroundColor: COLORS[i%COLORS.length],
-    tension:.25, pointRadius:4, pointHoverRadius:6, fill:false,
-  }));
-  const ctx = document.getElementById('chartTrend').getContext('2d');
-  if (charts.trend) charts.trend.destroy();
-  charts.trend = new Chart(ctx, {
-    type:'line', data:{labels, datasets},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:10}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, align:'top', offset:4, font:{weight:'bold',size:9.5}, color:(c)=>c.dataset.borderColor, formatter:v=>v===null?'':v+'%'}},
-      scales:{y:{title:{display:true,text:'% Achievement'}, ticks:{callback:v=>v+'%'}}}
-    }
-  });
-}
-
-function renderRegisChatChart(person){
-  const labels = ['May','June','July'];
-  const getVal = (m, field) => {
-    if (person === 'ALL') return RAW.periods[m].total[field];
-    const p = RAW.periods[m].persons.find(x => x.short === person);
-    return p ? p[field] : 0;
-  };
-  const regis = labels.map(m=>getVal(m,'regis_combined'));
-  const chat = labels.map(m=>getVal(m,'chat_combined'));
-  document.getElementById('chartRCnote').textContent = person === 'ALL'
-    ? 'ผลรวมจริงของ KAVALON + ATMOZ DESOL ทั้งทีม แยกตามเดือน' : `ผลรวมจริงของ KAVALON + ATMOZ DESOL ของ ${person} แยกตามเดือน`;
-  const ctx = document.getElementById('chartRegisChat').getContext('2d');
-  if (charts.rc) charts.rc.destroy();
-  charts.rc = new Chart(ctx, {
-    type:'bar', data:{labels, datasets:[
-      {label:'Register', data:regis, backgroundColor:'#1e8e3e'},
-      {label:'Chat', data:chat, backgroundColor:'#c05c00'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:11}, formatter:v=>fmtNum(v)}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Count'}}}
-    }
-  });
-}
-
-function renderRatiosChart(month, person){
-  const rows = applyPersonFilter(getPersonsForMonth(month), person);
-  const labels = rows.map(r=>r.short);
-  const leadWalk = rows.map(r=>r.ratio_lead_walk_combined);
-  const walkBook = rows.map(r=>r.ratio_walk_book);
-  const ctx = document.getElementById('chartRatios').getContext('2d');
-  if (charts.ratios) charts.ratios.destroy();
-  charts.ratios = new Chart(ctx, {
-    type:'bar', data:{labels, datasets:[
-      {label:'Ratio Lead:Walk', data:leadWalk, backgroundColor:'#7c9fc4'},
-      {label:'Ratio Walk:Book', data:walkBook, backgroundColor:'#c05c00'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:10.5}, formatter:v=>v===null?'N/A':v.toFixed(2)}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Ratio'}}}
-    }
-  });
-}
-
-function renderRankingChart(month, person){
-  const rows = applyPersonFilter(getPersonsForMonth(month), person).slice().sort((a,b)=>b.pct-a.pct);
-  const labels = rows.map(r=>r.short);
-  const target = rows.map(r=>r.target_unit);
-  const actual = rows.map(r=>r.actual_unit);
-  const ctx = document.getElementById('chartRanking').getContext('2d');
-  if (charts.rank) charts.rank.destroy();
-  charts.rank = new Chart(ctx, {
-    type:'bar', data:{labels, datasets:[
-      {label:'Target', data:target, backgroundColor:'#dbe6f2'},
-      {label:'Actual', data:actual, backgroundColor: rows.map(r=>pctColor(r.pct))},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y', layout:{padding:{right:30}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'right', color:'#333', font:{weight:'bold',size:10.5}, formatter:v=>fmtNum(v)}},
-      scales:{x:{beginAtZero:true, title:{display:true,text:'Unit'}}}
-    }
-  });
-}
-
-function renderCSChart(person){
-  const rows = applyPersonFilter(getCSSource(), person);
-  const labels = rows.map(r=>r.short);
-  const cs1pct = rows.map(r=> r.cs1_pct===null?null:+(r.cs1_pct*100).toFixed(1));
-  const cs2pct = rows.map(r=> r.cs2_pct===null?null:+(r.cs2_pct*100).toFixed(1));
-  const cs1score = rows.map(r=> r.cs1_score===null?null:+(r.cs1_score*100).toFixed(1));
-  const cs2score = rows.map(r=> r.cs2_score===null?null:+(r.cs2_score*100).toFixed(1));
-  const ctx = document.getElementById('chartCS').getContext('2d');
-  if (charts.cs) charts.cs.destroy();
-  charts.cs = new Chart(ctx, {
-    type:'bar', data:{labels, datasets:[
-      {label:'% CS1', data:cs1pct, backgroundColor:'#2e75b6'},
-      {label:'% CS2', data:cs2pct, backgroundColor:'#7c9fc4'},
-      {label:'คะแนน CS1', data:cs1score, backgroundColor:'#1e8e3e'},
-      {label:'คะแนน CS2', data:cs2score, backgroundColor:'#8fd19e'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:9}, formatter:v=>v===null?'':v+'%'}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'%'}}}
-    }
-  });
-}
-
-function renderOverviewTable(month, person){
-  const csSrc = getCSSource();
-  const csByShort = {};
-  csSrc.forEach(r => csByShort[r.short] = r);
-  let rows = applyPersonFilter(getPersonsForMonth(month), person).map(r => ({...r,
-    cs1_pct: csByShort[r.short]?.cs1_pct ?? null, cs2_pct: csByShort[r.short]?.cs2_pct ?? null,
-    cs1_score: csByShort[r.short]?.cs1_score ?? null, cs2_score: csByShort[r.short]?.cs2_score ?? null}));
-  rows.sort((a,b) => {
-    const va=a[sortState.key], vb=b[sortState.key];
-    if (va===null&&vb===null) return 0; if (va===null) return 1; if (vb===null) return -1;
-    if (typeof va === 'string') return sortState.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
-    return sortState.dir==='asc'?va-vb:vb-va;
-  });
-  document.getElementById('detailTbody').innerHTML = rows.map(r => `
-    <tr>
-      <td class="name-cell">${r.name}</td>
-      <td>${fmtNum(r.target_unit)}</td>
-      <td>${fmtNum(r.actual_unit)}</td>
-      <td><span class="pct-pill ${pctClass(r.pct)}">${fmtPct(r.pct)}</span>
-        <div class="bar-wrap" style="margin-top:5px;"><div class="bar-fill" style="width:${Math.min(r.pct*100,100)}%; background:${pctColor(r.pct)};"></div></div></td>
-      <td>${fmtMB(r.target_mb)}</td>
-      <td>${fmtMB(r.actual_mb)}</td>
-      <td>${fmtNum(r.walkin)}</td>
-      <td>${fmtNum(r.total_lead_combined)}</td>
-      <td>${fmtNum(r.regis_combined)}</td>
-      <td>${fmtNum(r.chat_combined)}</td>
-      <td>${fmtRatio(r.ratio_lead_walk_combined)}</td>
-      <td>${fmtRatio(r.ratio_walk_book)}</td>
-      <td>${fmtPct(r.cs1_pct)}</td>
-      <td>${fmtPct(r.cs2_pct)}</td>
-      <td>${fmtPct(r.cs1_score)}</td>
-      <td>${fmtPct(r.cs2_score)}</td>
-    </tr>
-  `).join('');
-}
-
-function renderOverview(month, person){
-  renderOverviewKPIs(month, person);
-  renderTargetActualChart(person);
-  renderTrendChart(person);
-  renderRegisChatChart(person);
-  renderRatiosChart(month, person);
-  renderRankingChart(month, person);
-  renderCSChart(person);
-  renderOverviewTable(month, person);
-}
-
-// =========================================================
-// PROJECT MAIN VIEW (KAVALON / ATMOZ)
-// =========================================================
-function renderProjectMain(month, person, projectKey){
-  const key = MAIN_PROJECT_KEYS[projectKey];
-  const label = PROJECT_LABELS[projectKey];
-  document.getElementById('projMainSectionTitle').textContent = `เป้าขาย & ยอดขายสะสม (หัก B2B) รายคน — ${label}`;
-  document.getElementById('projChart1Title').textContent = `Target vs ยอดขายสะสม (หัก B2B) by Person — ${label}`;
-  document.getElementById('projChart2Title').textContent = `ยอดขายรวม vs ขายผ่าน B2B vs ยอดขายสะสม (หัก B2B) — ${label}`;
-  document.getElementById('projTableTitle').textContent = `ตารางรายละเอียดรายบุคคล — ${label}`;
-
-  const persons = applyPersonFilter(getPersonsForMonth(month), person);
-  const totalRec = getTotalForMonth(month);
-  const totalProj = person === 'ALL' ? totalRec[key] : (persons[0] ? persons[0][key] : null);
-
-  const kpis = [
-    {label:`Target (Unit) — ${label}`, value: fmtNum(totalProj?.target_unit)},
-    {label:`Target (MB) — ${label}`, value: fmtMB(totalProj?.target_mb)},
-    {label:'ยอดขายสะสม หัก B2B (Unit)', value: fmtNum(totalProj?.net_unit)},
-    {label:'ยอดขายสะสม หัก B2B (MB)', value: fmtMB(totalProj?.net_mb)},
-    {label:'% Achievement', value: fmtPct(totalProj?.pct)},
-    {label:'ขายผ่าน B2B (Unit)', value: fmtNum(totalProj?.b2b_unit)},
-    {label:'Walk-in', value: fmtNum(totalProj?.walkin)},
-    {label:'Register', value: fmtNum(totalProj?.regis)},
-    {label:'Chat', value: fmtNum(totalProj?.chat)},
-  ];
-  document.getElementById('kpiRowProject').innerHTML = kpis.map(k => `
-    <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>
-  `).join('');
-
-  // Chart 1: Target vs Net(หัก B2B) by person
-  const labels = persons.map(r=>r.short);
-  const target = persons.map(r=>r[key]?.target_unit ?? 0);
-  const net = persons.map(r=>r[key]?.net_unit ?? 0);
-  const ctx1 = document.getElementById('chartProjTargetNet').getContext('2d');
-  if (charts.projTN) charts.projTN.destroy();
-  charts.projTN = new Chart(ctx1, {
-    type:'bar', data:{labels, datasets:[
-      {label:'Target (Unit)', data:target, backgroundColor:'#dbe6f2'},
-      {label:'ยอดขายสะสม หัก B2B (Unit)', data:net, backgroundColor:'#2e75b6'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:10.5}, formatter:v=>fmtNum(v)}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Unit'}}}
-    }
-  });
-
-  // Chart 2: Gross vs B2B vs Net (stacked-ish grouped) by person
-  const gross = persons.map(r=>r[key]?.actual_unit ?? 0);
-  const b2b = persons.map(r=>r[key]?.b2b_unit ?? 0);
-  const netU = persons.map(r=>r[key]?.net_unit ?? 0);
-  const ctx2 = document.getElementById('chartProjB2B').getContext('2d');
-  if (charts.projB2B) charts.projB2B.destroy();
-  charts.projB2B = new Chart(ctx2, {
-    type:'bar', data:{labels, datasets:[
-      {label:'ยอดขายรวม (Unit)', data:gross, backgroundColor:'#9c27b0'},
-      {label:'ขายผ่าน B2B (Unit)', data:b2b, backgroundColor:'#c05c00'},
-      {label:'ยอดขายสะสม หัก B2B (Unit)', data:netU, backgroundColor:'#1e8e3e'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:9.5}, formatter:v=>fmtNum(v)}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Unit'}}}
-    }
-  });
-
-  // Table
-  let rows = persons.map(r => ({name:r.name, short:r.short, ...(r[key]||{})}));
-  rows.sort((a,b) => {
-    const va=a[projSortState.key], vb=b[projSortState.key];
-    if (va===null||va===undefined) return 1; if (vb===null||vb===undefined) return -1;
-    if (typeof va === 'string') return projSortState.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
-    return projSortState.dir==='asc'?va-vb:vb-va;
-  });
-  document.getElementById('projDetailTbody').innerHTML = rows.map(r => `
-    <tr>
-      <td class="name-cell">${r.name}</td>
-      <td>${fmtNum(r.target_unit)}</td>
-      <td>${fmtMB(r.target_mb)}</td>
-      <td>${fmtNum(r.actual_unit)}</td>
-      <td>${fmtMB(r.actual_mb)}</td>
-      <td>${fmtNum(r.b2b_unit)}</td>
-      <td>${fmtMB(r.b2b_mb)}</td>
-      <td>${fmtNum(r.net_unit)}</td>
-      <td>${fmtMB(r.net_mb)}</td>
-      <td><span class="pct-pill ${pctClass(r.pct||0)}">${fmtPct(r.pct)}</span></td>
-      <td>${fmtNum(r.walkin)}</td>
-      <td>${fmtNum(r.total_lead)}</td>
-      <td>${fmtNum(r.regis)}</td>
-      <td>${fmtNum(r.chat)}</td>
-      <td>${fmtRatio(r.ratio_lead_walk)}</td>
-      <td>${fmtRatio(r.ratio_walk_book)}</td>
-    </tr>
-  `).join('');
-}
-
-// =========================================================
-// PROJECT SMALL VIEW (MODIZ_AVG / KAVE_WDL / MAROON32 / KAVE_CNV / ATMOZ_KANAAL)
-// =========================================================
-function renderProjectSmall(person, projectKey){
-  const key = SMALL_PROJECT_KEYS[projectKey];
-  const label = PROJECT_LABELS[projectKey];
-  document.getElementById('smallChartTitle').textContent = `ยอดขายสะสม by Person — ${label}`;
-  document.getElementById('smallTableTitle').textContent = `ตารางยอดขายสะสมรายคน — ${label}`;
-
-  const cum = RAW.periods['Cumulative'];
-  const persons = applyPersonFilter(cum.persons, person);
-  const total = person === 'ALL' ? cum.total[key] : (persons[0] ? persons[0][key] : {unit:0,mb:0});
-
-  const kpis = [
-    {label:`ยอดขายสะสม (Unit) — ${label}`, value: fmtNum(total?.unit)},
-    {label:`ยอดขายสะสม (MB) — ${label}`, value: fmtMB(total?.mb)},
-  ];
-  document.getElementById('kpiRowSmall').innerHTML = kpis.map(k => `
-    <div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>
-  `).join('');
-
-  let rows = persons.map(r => ({name:r.name, short:r.short, unit:r[key]?.unit ?? 0, mb:r[key]?.mb ?? 0}));
-  rows.sort((a,b) => {
-    const va=a[smallSortState.key], vb=b[smallSortState.key];
-    if (typeof va === 'string') return smallSortState.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
-    return smallSortState.dir==='asc'?va-vb:vb-va;
-  });
-
-  const labels = rows.map(r=>r.short);
-  const units = rows.map(r=>r.unit);
-  const ctx = document.getElementById('chartSmallProject').getContext('2d');
-  if (charts.small) charts.small.destroy();
-  charts.small = new Chart(ctx, {
-    type:'bar', data:{labels, datasets:[
-      {label:'ยอดขายสะสม (Unit)', data:units, backgroundColor:'#2e75b6'},
-    ]},
-    options:{responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
-      plugins:{legend:{position:'bottom'}, datalabels:{display:true, anchor:'end', align:'top', color:'#333', font:{weight:'bold',size:11},
-        formatter:(v,ctx)=>{const mb = rows[ctx.dataIndex].mb; return [fmtNum(v), '('+fmtMB(mb)+')'];}}},
-      scales:{y:{beginAtZero:true, title:{display:true,text:'Unit'}}}
-    }
-  });
-
-  document.getElementById('smallDetailTbody').innerHTML = rows.map(r => `
-    <tr><td class="name-cell">${r.name}</td><td>${fmtNum(r.unit)}</td><td>${fmtMB(r.mb)}</td></tr>
-  `).join('');
-}
-
-// =========================================================
-// MASTER RENDER / VIEW SWITCHING
-// =========================================================
-function updateInfoBanner(projectKey, month){
-  const banner = document.getElementById('infoBanner');
-  if (SMALL_PROJECT_KEYS[projectKey]) {
-    banner.textContent = `⚠️ โครงการ ${PROJECT_LABELS[projectKey]} มีเฉพาะข้อมูลยอดขายสะสม 3 เดือน (May–Jul) ในไฟล์ต้นฉบับ — ระบบจะแสดงยอดสะสมเสมอ โดยไม่อ้างอิงตัวกรอง "เดือน" ด้านบน`;
-    banner.classList.add('show');
-  } else {
-    banner.classList.remove('show');
+filterBtn.addEventListener('click', ()=>{
+  filterPanel.classList.toggle('open');
+  filterBtn.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!filterBtn.contains(e.target) && !filterPanel.contains(e.target)){
+    filterPanel.classList.remove('open');
+    filterBtn.classList.remove('open');
   }
-}
+});
+searchInput.addEventListener('input', e=>renderFilterList(e.target.value));
 
-function renderAll(){
-  const month = document.getElementById('monthFilter').value;
-  const project = document.getElementById('projectFilter').value;
-  const person = document.getElementById('personFilter').value;
-
-  updateInfoBanner(project, month);
-
-  const monthSelect = document.getElementById('monthFilter');
-  monthSelect.disabled = !!SMALL_PROJECT_KEYS[project];
-
-  document.getElementById('viewOverview').classList.remove('active');
-  document.getElementById('viewProjectMain').classList.remove('active');
-  document.getElementById('viewProjectSmall').classList.remove('active');
-
-  if (project === 'ALL') {
-    document.getElementById('viewOverview').classList.add('active');
-    renderOverview(month, person);
-  } else if (MAIN_PROJECT_KEYS[project]) {
-    document.getElementById('viewProjectMain').classList.add('active');
-    renderProjectMain(month, person, project);
-  } else if (SMALL_PROJECT_KEYS[project]) {
-    document.getElementById('viewProjectSmall').classList.add('active');
-    renderProjectSmall(person, project);
+filterList.addEventListener('change', e=>{
+  if(e.target.matches('input[type="checkbox"]')){
+    const no = Number(e.target.dataset.no);
+    if(e.target.checked) selected.add(no); else selected.delete(no);
+    updateAll();
   }
+});
+
+document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+  selected = new Set(RAW_DATA.map(d=>d.no));
+  renderFilterList(searchInput.value);
+  updateAll();
+});
+document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+  selected = new Set();
+  renderFilterList(searchInput.value);
+  updateAll();
+});
+
+function updateFilterLabel(){
+  const total = RAW_DATA.length;
+  const n = selected.size;
+  document.getElementById('filterCountLabel').textContent = `เลือก ${n} / ${total} คน`;
+  const label = document.getElementById('filterBtnLabel');
+  if(n===total) label.textContent = `พนักงานขายทั้งหมด (${total})`;
+  else if(n===0) label.textContent = `ยังไม่ได้เลือก`;
+  else if(n<=2) label.textContent = RAW_DATA.filter(d=>selected.has(d.no)).map(d=>d.name.split(' ')[0]).join(', ');
+  else label.textContent = `เลือกแล้ว ${n} คน`;
 }
 
-document.getElementById('monthFilter').addEventListener('change', renderAll);
-document.getElementById('projectFilter').addEventListener('change', renderAll);
-document.getElementById('personFilter').addEventListener('change', renderAll);
+// ---------- KPI ----------
+function renderKPIs(data){
+  const kpiRow = document.getElementById('kpiRow');
+  if(data.length===0){ kpiRow.innerHTML=''; return; }
+  const sum = k => data.reduce((a,d)=>a+(d[k]||0),0);
+  const targetMB = sum('target_mb'), netMB = sum('net_mb'), grossMB = sum('sales_mb');
+  const targetUnit = sum('target_unit'), netUnit = sum('net_unit');
+  const achievement = targetMB? (netMB/targetMB*100):0;
+  const walk = sum('walk'), register = sum('register');
+  const avgCS = data.reduce((a,d)=>a+ (d.cs1_score+d.cs2_score)/2,0)/data.length;
 
-document.querySelectorAll('#detailTable thead th').forEach(th => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.key;
-    if (sortState.key === key) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-    else { sortState.key = key; sortState.dir = 'desc'; }
-    renderOverviewTable(document.getElementById('monthFilter').value, document.getElementById('personFilter').value);
+  const cards = [
+    {label:'เป้าขายรวม (MB)', value: fmtMB(targetMB)+' MB', sub:`${fmtNum(targetUnit)} Unit`, cls:'neutral'},
+    {label:'ยอดขายสุทธิ (Net MB)', value: fmtMB(netMB)+' MB', sub:`${fmtNum(netUnit)} Unit`, cls:'neutral'},
+    {label:'% ความสำเร็จเป้า (Net)', value: fmtPct(achievement), sub: achievement>=100?'บรรลุเป้าหมาย':`ขาดอีก ${fmtMB(targetMB-netMB)} MB`, cls: achievement>=100?'pos':'neg'},
+    {label:'ยอดขายรวม (Gross MB)', value: fmtMB(grossMB)+' MB', sub:`รวม B2B ${fmtMB(sum('b2b_mb'))} MB`, cls:'neutral'},
+    {label:'Walk รวม', value: fmtNum(walk)+' ครั้ง', sub:`Register ${fmtNum(register)} ราย`, cls:'neutral'},
+    {label:'คะแนนเฉลี่ย CS1–CS2', value: avgCS.toFixed(1)+'%', sub:`จาก ${data.length} คนที่เลือก`, cls: avgCS>=90?'pos':'neutral'},
+  ];
+  kpiRow.innerHTML = cards.map(c=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-sub ${c.cls}">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ---------- Person cards ----------
+function tierOf(pct){
+  if(pct>=90) return 'good';
+  if(pct>=60) return 'mid';
+  return 'low';
+}
+function renderPersonCards(data){
+  const grid = document.getElementById('personGrid');
+  document.getElementById('personCountBadge').textContent = `${data.length} คน`;
+  if(data.length===0){ grid.innerHTML=''; return; }
+  const sorted = [...data].sort((a,b)=>b.pct_net_target - a.pct_net_target);
+  grid.innerHTML = sorted.map(d=>{
+    const tier = tierOf(d.pct_net_target);
+    const barColor = tier==='good'?'#0d9488':(tier==='mid'?'#d97706':'#dc2626');
+    const pct = Math.min(d.pct_net_target,100);
+    return `
+    <div class="person-card ${tier==='good'?'':tier}">
+      <div class="person-head">
+        <div>
+          <div class="person-rank">#${d.no}</div>
+          <div class="person-name">${d.name}</div>
+        </div>
+        <div class="person-pct ${tier}">${fmtPct(d.pct_net_target)}</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      <div class="person-metrics">
+        <div><span class="pm-label">เป้าขาย</span><span class="pm-value">${fmtMB(d.target_mb)} MB</span></div>
+        <div><span class="pm-label">ยอดขาย Net</span><span class="pm-value">${fmtMB(d.net_mb)} MB</span></div>
+        <div><span class="pm-label">Unit เป้า</span><span class="pm-value">${fmtNum(d.target_unit)}</span></div>
+        <div><span class="pm-label">Unit Net</span><span class="pm-value">${fmtNum(d.net_unit)}</span></div>
+        <div><span class="pm-label">Walk</span><span class="pm-value">${fmtNum(d.walk)}</span></div>
+        <div><span class="pm-label">Register</span><span class="pm-value">${fmtNum(d.register)}</span></div>
+        <div><span class="pm-label">%CS1</span><span class="pm-value">${fmtPct(d.cs1_pct)}</span></div>
+        <div><span class="pm-label">%CS2</span><span class="pm-value">${fmtPct(d.cs2_pct)}</span></div>
+        <div class="full">
+          <span class="pm-label">Diff เทียบเป้า</span>
+          <span class="pm-value" style="color:${d.diff_mb<0?'var(--red)':'var(--teal)'};">${fmtMB(d.diff_mb)} MB</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- Table ----------
+function pctPillClass(v){
+  if(v>=90) return 'pct-good';
+  if(v>=60) return 'pct-mid';
+  return 'pct-bad';
+}
+
+function renderTable(data){
+  const body = document.getElementById('tableBody');
+  const emptyState = document.getElementById('emptyState');
+  const tableScroll = document.querySelector('.table-scroll');
+  if(data.length===0){
+    emptyState.style.display='block';
+    tableScroll.style.display='none';
+    body.innerHTML='';
+    return;
+  }
+  emptyState.style.display='none';
+  tableScroll.style.display='block';
+  const sorted = [...data].sort((a,b)=>{
+    let av=a[sortKey], bv=b[sortKey];
+    if(typeof av==='string') return sortDir==='asc'? av.localeCompare(bv): bv.localeCompare(av);
+    return sortDir==='asc'? av-bv : bv-av;
   });
-});
-document.querySelectorAll('#projDetailTable thead th').forEach(th => {
-  th.addEventListener('click', () => {
+  body.innerHTML = sorted.map(d=>`
+    <tr>
+      <td>${d.no}</td>
+      <td class="name-cell">${d.name}</td>
+      <td>${fmtNum(d.target_unit)}</td>
+      <td>${fmtMB(d.target_mb)}</td>
+      <td>${fmtNum(d.sales_unit)}</td>
+      <td>${fmtMB(d.sales_mb)}</td>
+      <td><span class="pct-pill ${pctPillClass(d.pct_target)}">${fmtPct(d.pct_target)}</span></td>
+      <td>${fmtNum(d.b2b_unit)}</td>
+      <td>${fmtMB(d.b2b_mb)}</td>
+      <td>${fmtNum(d.net_unit)}</td>
+      <td>${fmtMB(d.net_mb)}</td>
+      <td><span class="pct-pill ${pctPillClass(d.pct_net_target)}">${fmtPct(d.pct_net_target)}</span></td>
+      <td class="${d.diff_unit<0?'diff-neg':'diff-pos'}">${fmtNum(d.diff_unit)}</td>
+      <td class="${d.diff_mb<0?'diff-neg':'diff-pos'}">${fmtMB(d.diff_mb)}</td>
+      <td>${fmtNum(d.walk)}</td>
+      <td>${d.ratio_walk_book}</td>
+      <td>${fmtNum(d.register)}</td>
+      <td>${d.ratio_lead_walk}</td>
+      <td>${fmtPct(d.cs1_pct)}</td>
+      <td>${fmtPct(d.cs2_pct)}</td>
+      <td>${fmtPct(d.cs1_score)}</td>
+      <td>${fmtPct(d.cs2_score)}</td>
+    </tr>`).join('');
+}
+
+document.querySelectorAll('thead th[data-key]').forEach(th=>{
+  th.addEventListener('click', ()=>{
     const key = th.dataset.key;
-    if (projSortState.key === key) projSortState.dir = projSortState.dir === 'asc' ? 'desc' : 'asc';
-    else { projSortState.key = key; projSortState.dir = 'desc'; }
-    renderAll();
-  });
-});
-document.querySelectorAll('#smallDetailTable thead th').forEach(th => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.key;
-    if (smallSortState.key === key) smallSortState.dir = smallSortState.dir === 'asc' ? 'desc' : 'asc';
-    else { smallSortState.key = key; smallSortState.dir = 'desc'; }
-    renderAll();
+    if(sortKey===key) sortDir = sortDir==='asc'?'desc':'asc';
+    else { sortKey=key; sortDir='desc'; }
+    document.querySelectorAll('thead th[data-key]').forEach(t=>t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    updateAll();
   });
 });
 
-renderAll();
+// ---------- Master update ----------
+function updateAll(){
+  updateFilterLabel();
+  const data = RAW_DATA.filter(d=>selected.has(d.no));
+  renderTable(data);
+  renderKPIs(data);
+  renderPersonCards(data);
+}
+
+updateAll();
 </script>
 </body>
 </html>
